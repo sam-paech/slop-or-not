@@ -33,7 +33,8 @@
   #leaderboard { display: none; width: 100%; }
   #leaderboard.visible { display: block; }
   .leaderboard-row { display: flex; align-items: center; gap: 10px; padding: 10px; margin: 6px 0; background: var(--card); border: 1px solid #2a2f3a; border-radius: 6px; transition: all 0.3s ease; position: relative; }
-  .leaderboard-row.user-result { background: #1a2533; border: 2px solid var(--accent); animation: slideIn 0.5s ease-out; }
+  .leaderboard-row.user-result { animation: slideIn 0.5s ease-out; }
+  .leaderboard-row.user-result .leaderboard-name { font-weight: 700; }
   @keyframes slideIn {
     from { opacity: 0; transform: translateX(-20px); }
     to { opacity: 1; transform: translateX(0); }
@@ -64,53 +65,57 @@
 
   button.secondary { background: transparent; border: 1px solid var(--accent); color: var(--accent); margin-left: 10px; }
   button.secondary:hover { background: var(--accent); color: var(--bg); }
+
+  /* Mobile styles */
+  @media (max-width: 768px) {
+    .row { grid-template-columns: 1fr; }
+    .panel { display: none; }
+    .leaderboard-row.selected .leaderboard-report-btn { display: inline-block; }
+  }
+  @media (min-width: 769px) {
+    .leaderboard-report-btn { display: none !important; }
+  }
+
+  /* Leaderboard row selection state */
+  .leaderboard-row { cursor: pointer; }
+  .leaderboard-row:hover { background: #1e2530; }
+  .leaderboard-row.selected { background: #1a2533; border-color: var(--accent); }
+
+  /* File upload styles */
+  #fileList { display: none; min-height: 50vh; padding: 12px; background: var(--card); border: 1px solid #2a2f3a; border-radius: 8px; }
+  #fileList.visible { display: block; }
+  .file-item { display: flex; align-items: center; justify-content: space-between; padding: 8px 12px; margin: 6px 0; background: #10141c; border: 1px solid #2a2f3a; border-radius: 6px; }
+  .file-name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .file-size { color: var(--muted); font-size: 12px; margin-left: 12px; }
+  .file-remove { background: transparent; color: #ff6b6b; border: 1px solid #ff6b6b; border-radius: 4px; padding: 4px 8px; font-size: 12px; cursor: pointer; margin-left: 12px; }
+  .file-remove:hover { background: #ff6b6b; color: var(--bg); }
+  textarea.drag-over { border-color: var(--accent); background: #1a1f2a; }
+  .drop-hint { color: var(--muted); font-size: 13px; margin-top: 8px; }
+
+  /* Spinner animation */
+  .spinner { display: inline-block; width: 14px; height: 14px; border: 2px solid rgba(255,255,255,0.3); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; margin-left: 8px; vertical-align: middle; }
+  @keyframes spin { to { transform: rotate(360deg); } }
 </style>
 </head>
 <body>
-  <h1>Writing Metrics</h1>
+  <h1>Slop-or-Not</h1>
+  <div class="section">
+    <button id="analyzeTextBtn" class="secondary" style="display:none;">Analyse Text</button>
+    <button id="viewLeaderboardBtn" class="secondary" style="display:none;">View Leaderboard</button>
+    <button id="analyzeBtn" disabled style="display:none;">Analyze</button>
+    <span id="status" class="muted" style="margin-left:10px;">loading resources…</span>
+  </div>
+  <div id="errors" class="section mono" style="white-space:pre-wrap;color:#ffb4b4;"></div>
   <div class="row">
     <div>
-      <textarea id="input" placeholder="Paste or type your long-form text here…"></textarea>
-      <div id="leaderboard"></div>
-      <div class="section">
-        <button id="analyzeBtn" disabled>Analyze</button>
-        <button id="viewLeaderboardBtn" class="secondary">View Leaderboard</button>
-        <button id="newTextBtn" class="secondary" style="display:none;">Analyse New Text</button>
-        <span id="status" class="muted" style="margin-left:10px;">loading resources…</span>
-      </div>
-      <div id="errors" class="section mono" style="white-space:pre-wrap;color:#ffb4b4;"></div>
+      <textarea id="input" placeholder="Paste or type your long-form text here…" style="display:none;"></textarea>
+      <div id="fileList"></div>
+      <div class="drop-hint" id="dropHint" style="display:none;">You can also drag and drop .txt files here</div>
+      <div id="leaderboard" class="visible"></div>
     </div>
     <div class="panel">
-      <div class="metric"><div>Total characters</div><div id="m_chars" class="mono">—</div></div>
-      <div class="metric"><div>Total words</div><div id="m_words" class="mono">—</div></div>
-      <div class="metric"><div>Slop index (per 1k words)</div><div id="m_slop" class="mono">—</div></div>
-      <div class="metric"><div>Repetition score (%)</div><div id="m_rep" class="mono">—</div></div>
-      <div class="metric"><div>Not-x-but-y Patterns (per 1k chars)</div><div id="m_contrast" class="mono">—</div></div>
-
-      <div class="section">
-        <details open>
-          <summary>Top over-represented words</summary>
-          <div id="topWords" style="margin-top:8px;"></div>
-        </details>
-        <details open>
-          <summary>Top bigrams (over-use vs human)</summary>
-          <div id="topBigrams" style="margin-top:8px;"></div>
-        </details>
-        <details open>
-          <summary>Top trigrams (over-use vs human)</summary>
-          <div id="topTrigrams" style="margin-top:8px;"></div>
-        </details>
-        <details>
-          <summary>Not-x-but-y Patterns</summary>
-          <div id="contrastMatches" style="margin-top:8px;"></div>
-        </details>
-        <details>
-          <summary>Exact repeated phrases (trigram-based)</summary>
-          <div id="topPhrases" style="margin-top:8px;"></div>
-        </details>
-      </div>
-      <div class="section muted" style="font-size:12px;">
-        Resources in <code>data/</code>: <code>human_writing_profile.json</code>, <code>slop_list.json</code>, <code>slop_list_bigrams.json</code>, <code>slop_list_trigrams.json</code>.
+      <div id="panelContent">
+        <div style="color: var(--muted); font-size: 12px; margin-bottom: 16px;">Select a model to view details</div>
       </div>
     </div>
   </div>
@@ -136,7 +141,6 @@ import {
   contentTokens,
   makeNgrams,
   rankOveruseWithCounts,
-  extractRepeatedPhrases,
   humanBigramFreq,
   humanTrigramFreq,
   lookupFrequency,
@@ -151,19 +155,12 @@ const ui = {
   status: document.getElementById('status'),
   errors: document.getElementById('errors'),
   input: document.getElementById('input'),
+  fileList: document.getElementById('fileList'),
+  dropHint: document.getElementById('dropHint'),
   leaderboard: document.getElementById('leaderboard'),
   viewLeaderboardBtn: document.getElementById('viewLeaderboardBtn'),
-  newTextBtn: document.getElementById('newTextBtn'),
-  m_chars: document.getElementById('m_chars'),
-  m_words: document.getElementById('m_words'),
-  m_slop: document.getElementById('m_slop'),
-  m_rep: document.getElementById('m_rep'),
-  m_contrast: document.getElementById('m_contrast'),
-  topWords: document.getElementById('topWords'),
-  topBigrams: document.getElementById('topBigrams'),
-  topTrigrams: document.getElementById('topTrigrams'),
-  contrastMatches: document.getElementById('contrastMatches'),
-  topPhrases: document.getElementById('topPhrases'),
+  analyzeTextBtn: document.getElementById('analyzeTextBtn'),
+  panelContent: document.getElementById('panelContent'),
   modal: document.getElementById('detailModal'),
   modalBody: document.getElementById('modalBody'),
   closeModal: document.getElementById('closeModal'),
@@ -173,6 +170,94 @@ let ready = false;
 let leaderboardData = null;
 let normalizationRanges = null;
 let userResult = null;
+let selectedModel = null;
+let analysisResourcesLoaded = false;
+let uploadedFiles = [];
+
+// File management functions
+function formatFileSize(bytes) {
+  if (bytes < 1024) return bytes + ' B';
+  if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+  return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+}
+
+function renderFileList() {
+  if (uploadedFiles.length === 0) {
+    ui.fileList.style.display = 'none';
+    ui.fileList.classList.remove('visible');
+    ui.input.style.display = 'block';
+    ui.dropHint.style.display = 'block';
+    return;
+  }
+
+  ui.input.style.display = 'none';
+  ui.dropHint.style.display = 'none';
+  ui.fileList.style.display = 'block';
+  ui.fileList.classList.add('visible');
+
+  let html = '<div style="margin-bottom: 12px; color: var(--muted); font-size: 13px;">';
+  html += `${uploadedFiles.length} file${uploadedFiles.length > 1 ? 's' : ''} selected for analysis:`;
+  html += '</div>';
+
+  uploadedFiles.forEach((file, index) => {
+    html += `
+      <div class="file-item">
+        <span class="file-name" title="${file.name}">${file.name}</span>
+        <span class="file-size">${formatFileSize(file.size)}</span>
+        <button class="file-remove" data-index="${index}">×</button>
+      </div>
+    `;
+  });
+
+  ui.fileList.innerHTML = html;
+
+  // Add event listeners to remove buttons
+  ui.fileList.querySelectorAll('.file-remove').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      const index = parseInt(e.target.dataset.index);
+      uploadedFiles.splice(index, 1);
+      renderFileList();
+    });
+  });
+}
+
+function handleFiles(files) {
+  // Filter for text files only
+  const textFiles = Array.from(files).filter(file =>
+    file.type === 'text/plain' || file.name.endsWith('.txt')
+  );
+
+  if (textFiles.length === 0) {
+    ui.errors.textContent = '⚠ Please drop only .txt files';
+    setTimeout(() => ui.errors.textContent = '', 3000);
+    return;
+  }
+
+  // Add files to the list (avoid duplicates by name)
+  textFiles.forEach(file => {
+    if (!uploadedFiles.some(f => f.name === file.name)) {
+      uploadedFiles.push(file);
+    }
+  });
+
+  renderFileList();
+  ui.errors.textContent = '';
+}
+
+async function readFilesContent() {
+  const contents = await Promise.all(
+    uploadedFiles.map(file => {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = (e) => resolve(e.target.result);
+        reader.onerror = reject;
+        reader.readAsText(file);
+      });
+    })
+  );
+
+  return contents.join('\n\n');
+}
 
 function renderPills(targetEl, items, fmt = (w, v) => `<b>${w}</b> <span class="muted">(${v})</span>`, showLimit = 10) {
   if (!items.length) {
@@ -342,12 +427,210 @@ function renderLeaderboard(includeUserResult = false) {
 
   ui.leaderboard.innerHTML = html;
 
-  // Add event listeners to report buttons
+  // Add event listeners to rows for selection
+  ui.leaderboard.querySelectorAll('.leaderboard-row').forEach(row => {
+    const rowModel = row.querySelector('.leaderboard-report-btn').dataset.model;
+
+    row.addEventListener('click', (e) => {
+      // Don't trigger row click if clicking the report button
+      if (e.target.classList.contains('leaderboard-report-btn')) {
+        return;
+      }
+
+      // Deselect all rows
+      ui.leaderboard.querySelectorAll('.leaderboard-row').forEach(r => r.classList.remove('selected'));
+
+      // Select this row
+      row.classList.add('selected');
+
+      // Update right panel with model stats
+      const entry = entries.find(e => e.model === rowModel);
+      selectedModel = entry;
+      updateRightPanel(entry);
+    });
+  });
+
+  // Add event listeners to report buttons (for mobile)
   ui.leaderboard.querySelectorAll('.leaderboard-report-btn').forEach(btn => {
     btn.addEventListener('click', (e) => {
+      e.stopPropagation();
       const model = e.target.dataset.model;
       const entry = entries.find(e => e.model === model);
       showDetailModal(entry);
+    });
+  });
+
+  // Auto-select the first model or user's text if available
+  if (entries.length > 0) {
+    const firstRow = ui.leaderboard.querySelector('.leaderboard-row');
+    if (firstRow) {
+      firstRow.click();
+    }
+  }
+}
+
+function updateRightPanel(entry) {
+  const data = entry.fullData;
+
+  let html = `<h3 style="margin: 0 0 16px;">${entry.model}</h3>`;
+
+  if (data.metrics) {
+    // Compute normalized values for bars
+    const normSlop = normalizeValue(data.metrics.slop_list_matches_per_1k_words, normalizationRanges.slop);
+    const normContrast = normalizeValue(data.metrics.not_x_but_y_per_1k_chars, normalizationRanges.contrast);
+
+    html += `
+      <div class="modal-metric">
+        <div class="modal-metric-bg slop" style="width: ${entry.slopScore}%"></div>
+        <div class="modal-metric-label">Slop Score</div>
+        <div class="modal-metric-value">${entry.slopScore.toFixed(2)}</div>
+      </div>
+      <div class="modal-metric">
+        <div class="modal-metric-bg slop" style="width: ${normSlop * 100}%"></div>
+        <div class="modal-metric-label">Slop List Matches (per 1k words)</div>
+        <div class="modal-metric-value">${data.metrics.slop_list_matches_per_1k_words.toFixed(2)}</div>
+      </div>
+      <div class="modal-metric">
+        <div class="modal-metric-bg slop" style="width: ${normContrast * 100}%"></div>
+        <div class="modal-metric-label">Not-x-but-y Patterns (per 1k chars)</div>
+        <div class="modal-metric-value">${data.metrics.not_x_but_y_per_1k_chars.toFixed(2)}</div>
+      </div>
+    `;
+
+    if (data.metrics.lexical_diversity) {
+      html += `<h4 style="margin-top: 16px;">Lexical Diversity</h4>`;
+
+      if (data.metrics.lexical_diversity.mattr_500 !== undefined) {
+        html += `
+          <div class="modal-metric">
+            <div class="modal-metric-bg diversity" style="width: ${data.metrics.lexical_diversity.mattr_500 * 100}%"></div>
+            <div class="modal-metric-label">MATTR-500</div>
+            <div class="modal-metric-value">${data.metrics.lexical_diversity.mattr_500.toFixed(4)}</div>
+          </div>
+        `;
+      }
+
+      html += `
+        <div class="modal-metric">
+          <div class="modal-metric-label">N-gram Repetition Score</div>
+          <div class="modal-metric-value">${data.metrics.ngram_repetition_score.toFixed(4)}</div>
+        </div>
+      `;
+
+      if (data.metrics.lexical_diversity.unique_words !== undefined) {
+        html += `
+          <div class="modal-metric">
+            <div class="modal-metric-label">Unique Words</div>
+            <div class="modal-metric-value">${data.metrics.lexical_diversity.unique_words.toLocaleString()}</div>
+          </div>
+        `;
+      }
+
+      if (data.metrics.lexical_diversity.total_words !== undefined) {
+        html += `
+          <div class="modal-metric">
+            <div class="modal-metric-label">Total Words</div>
+            <div class="modal-metric-value">${data.metrics.lexical_diversity.total_words.toLocaleString()}</div>
+          </div>
+        `;
+      }
+    }
+
+    if (data.sample_count) {
+      html += `
+        <h4 style="margin-top: 16px;">Sample Info</h4>
+        <div class="modal-metric">
+          <div class="modal-metric-label">Sample Count</div>
+          <div class="modal-metric-value">${data.sample_count}</div>
+        </div>
+        <div class="modal-metric">
+          <div class="modal-metric-label">Total Characters</div>
+          <div class="modal-metric-value">${data.total_chars.toLocaleString()}</div>
+        </div>
+      `;
+    } else if (data.total_chars) {
+      html += `
+        <h4 style="margin-top: 16px;">Sample Info</h4>
+        <div class="modal-metric">
+          <div class="modal-metric-label">Total Characters</div>
+          <div class="modal-metric-value">${data.total_chars.toLocaleString()}</div>
+        </div>
+      `;
+    }
+
+    // Helper function to render items with show more
+    const renderItemsWithShowMore = (items, title, formatter) => {
+      if (!items || items.length === 0) return '';
+
+      const toggleId = 'panel_' + Math.random().toString(36).substr(2, 9);
+      let itemsHtml = `<h4 style="margin-top: 16px;">${title}</h4><div style="margin-top: 8px;">`;
+
+      const visibleItems = items.slice(0, 10);
+      const hiddenItems = items.slice(10);
+
+      visibleItems.forEach(item => {
+        itemsHtml += formatter(item);
+      });
+
+      if (hiddenItems.length > 0) {
+        itemsHtml += `<div id="${toggleId}_hidden" style="display:none;">`;
+        hiddenItems.forEach(item => {
+          itemsHtml += formatter(item);
+        });
+        itemsHtml += `</div>`;
+        itemsHtml += `<button class="show-more" id="${toggleId}_btn">Show ${hiddenItems.length} more</button>`;
+      }
+
+      itemsHtml += `</div>`;
+      return itemsHtml;
+    };
+
+    if (data.top_over_represented) {
+      html += renderItemsWithShowMore(
+        data.top_over_represented.words,
+        'Top Over-represented Words',
+        w => `<span class="pill"><b>${w.word}</b> <span class="muted">${w.ratio.toFixed(2)}×</span></span>`
+      );
+
+      html += renderItemsWithShowMore(
+        data.top_over_represented.bigrams,
+        'Top Over-represented Bigrams',
+        b => `<span class="pill"><b>${b.phrase}</b> <span class="muted">${b.ratio.toFixed(2)}×</span></span>`
+      );
+
+      html += renderItemsWithShowMore(
+        data.top_over_represented.trigrams,
+        'Top Over-represented Trigrams',
+        t => `<span class="pill"><b>${t.phrase}</b> <span class="muted">${t.ratio.toFixed(2)}×</span></span>`
+      );
+    }
+
+    // Add contrast matches
+    if (data.contrast_matches && data.contrast_matches.length > 0) {
+      html += renderItemsWithShowMore(
+        data.contrast_matches,
+        'Not-x-but-y Patterns',
+        m => `<div class="contrast-match">
+          <div class="pattern">${m.pattern_name}</div>
+          <div>${m.sentence}</div>
+        </div>`
+      );
+    }
+  }
+
+  ui.panelContent.innerHTML = html;
+
+  // Add click handlers for show more buttons
+  ui.panelContent.querySelectorAll('.show-more').forEach(btn => {
+    const toggleId = btn.id.replace('_btn', '');
+    const hiddenDiv = document.getElementById(`${toggleId}_hidden`);
+    let expanded = false;
+
+    btn.addEventListener('click', () => {
+      expanded = !expanded;
+      hiddenDiv.style.display = expanded ? 'block' : 'none';
+      const count = btn.textContent.match(/\d+/)[0];
+      btn.textContent = expanded ? 'Show less' : `Show ${count} more`;
     });
   });
 }
@@ -381,26 +664,42 @@ function showDetailModal(entry) {
     `;
 
     if (data.metrics.lexical_diversity) {
+      html += `<h4 style="margin-top: 16px;">Lexical Diversity</h4>`;
+
+      if (data.metrics.lexical_diversity.mattr_500 !== undefined) {
+        html += `
+          <div class="modal-metric">
+            <div class="modal-metric-bg diversity" style="width: ${data.metrics.lexical_diversity.mattr_500 * 100}%"></div>
+            <div class="modal-metric-label">MATTR-500</div>
+            <div class="modal-metric-value">${data.metrics.lexical_diversity.mattr_500.toFixed(4)}</div>
+          </div>
+        `;
+      }
+
       html += `
-        <h4 style="margin-top: 16px;">Lexical Diversity</h4>
-        <div class="modal-metric">
-          <div class="modal-metric-bg diversity" style="width: ${data.metrics.lexical_diversity.mattr_500 * 100}%"></div>
-          <div class="modal-metric-label">MATTR-500</div>
-          <div class="modal-metric-value">${data.metrics.lexical_diversity.mattr_500.toFixed(4)}</div>
-        </div>
         <div class="modal-metric">
           <div class="modal-metric-label">N-gram Repetition Score</div>
           <div class="modal-metric-value">${data.metrics.ngram_repetition_score.toFixed(4)}</div>
         </div>
-        <div class="modal-metric">
-          <div class="modal-metric-label">Unique Words</div>
-          <div class="modal-metric-value">${data.metrics.lexical_diversity.unique_words.toLocaleString()}</div>
-        </div>
-        <div class="modal-metric">
-          <div class="modal-metric-label">Total Words</div>
-          <div class="modal-metric-value">${data.metrics.lexical_diversity.total_words.toLocaleString()}</div>
-        </div>
       `;
+
+      if (data.metrics.lexical_diversity.unique_words !== undefined) {
+        html += `
+          <div class="modal-metric">
+            <div class="modal-metric-label">Unique Words</div>
+            <div class="modal-metric-value">${data.metrics.lexical_diversity.unique_words.toLocaleString()}</div>
+          </div>
+        `;
+      }
+
+      if (data.metrics.lexical_diversity.total_words !== undefined) {
+        html += `
+          <div class="modal-metric">
+            <div class="modal-metric-label">Total Words</div>
+            <div class="modal-metric-value">${data.metrics.lexical_diversity.total_words.toLocaleString()}</div>
+          </div>
+        `;
+      }
     }
 
     if (data.sample_count) {
@@ -463,6 +762,18 @@ function showDetailModal(entry) {
         t => `<span class="pill"><b>${t.phrase}</b> <span class="muted">${t.ratio.toFixed(2)}×</span></span>`
       );
     }
+
+    // Add contrast matches
+    if (data.contrast_matches && data.contrast_matches.length > 0) {
+      html += renderItemsWithShowMore(
+        data.contrast_matches,
+        'Not-x-but-y Patterns',
+        m => `<div class="contrast-match">
+          <div class="pattern">${m.pattern_name}</div>
+          <div>${m.sentence}</div>
+        </div>`
+      );
+    }
   }
 
   ui.modalBody.innerHTML = html;
@@ -486,24 +797,41 @@ function showDetailModal(entry) {
 
 function hideLeaderboard() {
   ui.leaderboard.classList.remove('visible');
-  ui.input.style.display = 'block';
+  ui.leaderboard.style.display = 'none';
+
+  // Show either file list or input box
+  if (uploadedFiles.length > 0) {
+    renderFileList();
+  } else {
+    ui.input.style.display = 'block';
+    ui.dropHint.style.display = 'block';
+  }
+
   ui.viewLeaderboardBtn.style.display = 'inline-block';
-  ui.newTextBtn.style.display = 'none';
+  ui.analyzeTextBtn.style.display = 'none';
   ui.btn.style.display = 'inline-block';
   ui.status.style.display = 'inline';
 }
 
 function showLeaderboard() {
   ui.input.style.display = 'none';
+  ui.fileList.style.display = 'none';
+  ui.fileList.classList.remove('visible');
+  ui.dropHint.style.display = 'none';
+  ui.leaderboard.style.display = 'block';
   ui.leaderboard.classList.add('visible');
   ui.viewLeaderboardBtn.style.display = 'none';
-  ui.newTextBtn.style.display = 'inline-block';
+  ui.analyzeTextBtn.style.display = 'inline-block';
   ui.btn.style.display = 'none';
   ui.status.style.display = 'none';
   renderLeaderboard(userResult !== null);
 }
 
-async function init() {
+async function loadAnalysisResources() {
+  if (analysisResourcesLoaded) {
+    return true; // Already loaded
+  }
+
   let posLoaded = false;
 
   try {
@@ -522,70 +850,107 @@ async function init() {
     ui.status.textContent = "loading wordfreq…";
     await loadWordfreq();
 
-    ui.status.textContent = "loading resources…";
-    await Promise.all([loadHumanProfile(), loadSlopSets(), loadLeaderboard()]);
+    ui.status.textContent = "loading analysis resources…";
+    await Promise.all([loadHumanProfile(), loadSlopSets()]);
 
-    ready = true;
-    const statusMsg = posLoaded
-      ? "ready (Stage1 + Stage2 patterns)"
-      : "ready (Stage1 patterns only - POS tagger unavailable)";
-    ui.status.textContent = statusMsg;
+    analysisResourcesLoaded = true;
+    ui.status.textContent = "ready";
 
     if (!posLoaded) {
       ui.errors.textContent = "⚠ Note: POS tagger could not be loaded. Stage2 contrast patterns are disabled, but Stage1 patterns will still work.";
     }
 
     ui.btn.disabled = false;
+    return true;
   } catch (e) {
-    ui.status.textContent = "CRITICAL ERROR";
+    ui.status.textContent = "ERROR";
     const errorMsg = String(e?.message || e);
-    ui.errors.textContent = `❌ ${errorMsg}\n\nThe application cannot function without this component. Please check:\n1. Your internet connection\n2. Browser console for details\n3. Whether CDN services are accessible`;
-    console.error('Initialization failed:', e);
-    // Keep button disabled on critical errors
+    ui.errors.textContent = `❌ ${errorMsg}\n\nFailed to load analysis resources. Please check:\n1. Your internet connection\n2. Browser console for details\n3. Whether CDN services are accessible`;
+    console.error('Analysis resources loading failed:', e);
     ui.btn.disabled = true;
+    return false;
   }
 }
 
-ui.btn.addEventListener('click', () => {
+async function init() {
+  try {
+    ui.status.textContent = "loading leaderboard…";
+    await loadLeaderboard();
+
+    ready = true;
+    ui.status.textContent = "";
+
+    // Show leaderboard by default on page load
+    showLeaderboard();
+  } catch (e) {
+    ui.status.textContent = "ERROR";
+    const errorMsg = String(e?.message || e);
+    ui.errors.textContent = `❌ ${errorMsg}\n\nFailed to load leaderboard. Please check:\n1. Your internet connection\n2. Browser console for details\n3. Whether the data file exists`;
+    console.error('Initialization failed:', e);
+  }
+}
+
+ui.btn.addEventListener('click', async () => {
   if (!ready) return;
   ui.errors.textContent = "";
 
-  const raw = ui.input.value || "";
-  const chars = raw.length;
-  const toks0 = wordsOnlyLower(raw);
-  const toks = alphaTokens(toks0);
-  const nWords = toks.length;
+  // Disable button and show spinner
+  ui.btn.disabled = true;
+  const originalBtnText = ui.btn.textContent;
+  ui.btn.innerHTML = 'Analyzing<span class="spinner"></span>';
 
-  ui.m_chars.textContent = chars.toLocaleString();
-  ui.m_words.textContent = nWords.toLocaleString();
+  try {
+    // Determine whether to use files or text input
+    let raw = "";
+    if (uploadedFiles.length > 0) {
+      try {
+        raw = await readFilesContent();
+      } catch (err) {
+        ui.errors.textContent = `❌ Error reading files: ${err.message}`;
+        ui.btn.disabled = false;
+        ui.btn.textContent = originalBtnText;
+        return;
+      }
+    } else {
+      raw = ui.input.value || "";
+    }
 
-  // Slop
-  const slop = computeSlopIndex(toks);
-  ui.m_slop.textContent = slop.toFixed(2);
+    if (!raw || raw.trim().length === 0) {
+      ui.errors.textContent = uploadedFiles.length > 0
+        ? "⚠ The selected files appear to be empty"
+        : "⚠ Please enter some text to analyze";
+      ui.btn.disabled = false;
+      ui.btn.textContent = originalBtnText;
+      return;
+    }
 
-  // Repetition score
-  const toksContent = contentTokens(toks);
-  const bigs = makeNgrams(toksContent, 2);
-  const tris = makeNgrams(toksContent, 3);
+    const chars = raw.length;
+    const toks0 = wordsOnlyLower(raw);
+    const toks = alphaTokens(toks0);
+    const nWords = toks.length;
 
-  const topBCounts = rankOveruseWithCounts(bigs, humanBigramFreq, 40);
-  const topTCounts = rankOveruseWithCounts(tris, humanTrigramFreq, 40);
+    // Slop
+    const slop = computeSlopIndex(toks);
 
-  const top_bigram_count = topBCounts.reduce((s, r) => s + r[2], 0);
-  const top_trigram_count = topTCounts.reduce((s, r) => s + r[2], 0);
-  const content_word_count = toksContent.length;
+    // Repetition score
+    const toksContent = contentTokens(toks);
+    const bigs = makeNgrams(toksContent, 2);
+    const tris = makeNgrams(toksContent, 3);
 
-  const repetition_score =
-    content_word_count > 0
-      ? ((top_bigram_count + top_trigram_count) / content_word_count) * 1000
-      : 0;
+    const topBCounts = rankOveruseWithCounts(bigs, humanBigramFreq, 40);
+    const topTCounts = rankOveruseWithCounts(tris, humanTrigramFreq, 40);
 
-  ui.m_rep.textContent = repetition_score.toFixed(4);
+    const top_bigram_count = topBCounts.reduce((s, r) => s + r[2], 0);
+    const top_trigram_count = topTCounts.reduce((s, r) => s + r[2], 0);
+    const content_word_count = toksContent.length;
 
-  // Contrast patterns
-  const contrastResult = scoreContrast(raw);
-  ui.m_contrast.textContent = contrastResult.rate_per_1k.toFixed(2);
-  renderContrastMatches(ui.contrastMatches, contrastResult.matches, 10);
+    const repetition_score =
+      content_word_count > 0
+        ? ((top_bigram_count + top_trigram_count) / content_word_count) * 1000
+        : 0;
+
+    // Contrast patterns
+    const contrastResult = scoreContrast(raw);
 
   // Compute slop score for user text
   const userSlopScore = computeSlopScore(slop, contrastResult.rate_per_1k);
@@ -594,11 +959,21 @@ ui.btn.addEventListener('click', () => {
   userResult = {
     slopScore: userSlopScore,
     fullData: {
+      total_chars: chars,
       metrics: {
         slop_list_matches_per_1k_words: slop,
         ngram_repetition_score: repetition_score,
-        not_x_but_y_per_1k_chars: contrastResult.rate_per_1k
-      }
+        not_x_but_y_per_1k_chars: contrastResult.rate_per_1k,
+        lexical_diversity: {
+          total_words: nWords
+        }
+      },
+      contrast_matches: contrastResult.matches.slice(0, 100).map(m => ({
+        pattern_name: m.pattern_name,
+        sentence: m.sentence,
+        match_text: m.match_text || '',
+        sentence_count: m.sentence_count || 1
+      }))
     }
   };
 
@@ -624,35 +999,42 @@ ui.btn.addEventListener('click', () => {
     }
   }
   wordOverrep.sort((a, b) => b[1] - a[1]);
-  const topWords = wordOverrep.slice(0, 40);
-  renderPills(
-    ui.topWords,
-    topWords.map(([w, ratio, cnt]) => [w, Number(ratio.toFixed(2))]),
-    (w, v) => `<b>${w}</b> <span class="muted">${v}×</span>`,
-    10
-  );
+  const topWords = wordOverrep.slice(0, 100);
 
-  // Top bigrams and trigrams
-  renderPills(
-    ui.topBigrams,
-    topBCounts.map(([w, ratio]) => [w, Number(ratio.toFixed(2))]),
-    (w, v) => `<b>${w}</b> <span class="muted">${v}×</span>`,
-    10
-  );
-  renderPills(
-    ui.topTrigrams,
-    topTCounts.map(([w, ratio]) => [w, Number(ratio.toFixed(2))]),
-    (w, v) => `<b>${w}</b> <span class="muted">${v}×</span>`,
-    10
-  );
+  // Update user result with top_over_represented data
+  userResult.fullData.top_over_represented = {
+    words: topWords.map(([w, ratio, cnt]) => ({ word: w, ratio, count: cnt })),
+    bigrams: topBCounts.slice(0, 100).map(([phrase, ratio, count]) => ({ phrase, ratio, count })),
+    trigrams: topTCounts.slice(0, 100).map(([phrase, ratio, count]) => ({ phrase, ratio, count }))
+  };
 
-  // Exact phrases
-  const topT = topTCounts.map(([ng, ratio, cnt]) => [ng, ratio]);
-  const phrases = extractRepeatedPhrases(raw, topT, 300);
-  renderPills(ui.topPhrases, phrases, (w, v) => `<b>${w}</b> <span class="muted">(${v})</span>`, 10);
+  // Re-enable button
+  ui.btn.disabled = false;
+  ui.btn.textContent = originalBtnText;
+
+  // Clear uploaded files and input text after successful analysis
+  uploadedFiles = [];
+  ui.input.value = '';
 
   // Show leaderboard after analysis
   showLeaderboard();
+
+  // Scroll to user's position on leaderboard
+  setTimeout(() => {
+    const userRow = ui.leaderboard.querySelector('.leaderboard-row.user-result');
+    if (userRow) {
+      userRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      // Click the row to select it
+      userRow.click();
+    }
+  }, 100);
+
+  } catch (error) {
+    console.error('Analysis error:', error);
+    ui.errors.textContent = `❌ Analysis failed: ${error.message}`;
+    ui.btn.disabled = false;
+    ui.btn.textContent = originalBtnText;
+  }
 });
 
 // Button event listeners
@@ -660,9 +1042,21 @@ ui.viewLeaderboardBtn.addEventListener('click', () => {
   showLeaderboard();
 });
 
-ui.newTextBtn.addEventListener('click', () => {
+ui.analyzeTextBtn.addEventListener('click', async () => {
   hideLeaderboard();
-  userResult = null;
+
+  // Load analysis resources if not already loaded
+  if (!analysisResourcesLoaded) {
+    ui.status.style.display = 'inline';
+    const success = await loadAnalysisResources();
+    if (!success) {
+      // If loading failed, go back to leaderboard
+      showLeaderboard();
+      return;
+    }
+  } else {
+    ui.status.textContent = "ready";
+  }
 });
 
 ui.closeModal.addEventListener('click', () => {
@@ -675,9 +1069,45 @@ ui.modal.addEventListener('click', (e) => {
   }
 });
 
-// Prefill for quick testing
-ui.input.value = `The silence wasn't empty. It wasn't absence; it was pressure. Not a pause—but a held breath.
-For the first time in years, the quiet felt shared. The lattice rose, not just as metal, but as intention.`;
+// Drag and drop event handlers
+ui.input.addEventListener('dragover', (e) => {
+  e.preventDefault();
+  e.stopPropagation();
+  ui.input.classList.add('drag-over');
+});
+
+ui.input.addEventListener('dragleave', (e) => {
+  e.preventDefault();
+  e.stopPropagation();
+  ui.input.classList.remove('drag-over');
+});
+
+ui.input.addEventListener('drop', (e) => {
+  e.preventDefault();
+  e.stopPropagation();
+  ui.input.classList.remove('drag-over');
+
+  const files = e.dataTransfer.files;
+  if (files.length > 0) {
+    handleFiles(files);
+  }
+});
+
+// Also handle file selection on the file list area
+ui.fileList.addEventListener('dragover', (e) => {
+  e.preventDefault();
+  e.stopPropagation();
+});
+
+ui.fileList.addEventListener('drop', (e) => {
+  e.preventDefault();
+  e.stopPropagation();
+
+  const files = e.dataTransfer.files;
+  if (files.length > 0) {
+    handleFiles(files);
+  }
+});
 
 init();
 </script>

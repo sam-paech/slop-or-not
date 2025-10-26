@@ -144,6 +144,14 @@ function calculateMetrics(text) {
   const chars = text.length;
   const contrastRate = chars > 0 ? (contrastResult.length / chars) * 1000 : 0;
 
+  // Save up to 100 not-x-but-y patterns for display
+  const contrastMatches = contrastResult.slice(0, 100).map(m => ({
+    pattern_name: m.pattern_name,
+    sentence: m.sentence,
+    match_text: m.match_text,
+    sentence_count: m.sentence_count
+  }));
+
   // Lexical diversity
   const lexicalDiversity = calculateLexicalDiversity(toks);
 
@@ -192,7 +200,8 @@ function calculateMetrics(text) {
       words: wordOverrep.slice(0, 100),
       bigrams: topBigrams,
       trigrams: topTrigrams
-    }
+    },
+    contrast_matches: contrastMatches
   };
 }
 
@@ -244,7 +253,8 @@ function processModel(data) {
       not_x_but_y_per_1k_chars: metrics.not_x_but_y_per_1k_chars,
       lexical_diversity: metrics.lexical_diversity
     },
-    top_over_represented: metrics.top_over_represented
+    top_over_represented: metrics.top_over_represented,
+    contrast_matches: metrics.contrast_matches
   };
 }
 
@@ -304,7 +314,8 @@ function processHumanBaseline() {
       not_x_but_y_per_1k_chars: metrics.not_x_but_y_per_1k_chars,
       lexical_diversity: metrics.lexical_diversity
     },
-    top_over_represented: metrics.top_over_represented
+    top_over_represented: metrics.top_over_represented,
+    contrast_matches: metrics.contrast_matches
   };
 }
 
