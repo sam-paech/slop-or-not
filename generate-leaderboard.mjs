@@ -107,6 +107,54 @@ function calculateLexicalDiversity(tokens) {
   };
 }
 
+// Additional text analytics functions
+function calculateFleschKincaid(text) {
+  const sentences = text.split(/[.!?]+/).filter(s => s.trim().length > 0);
+  const words = text.match(/\b\w+\b/g) || [];
+
+  if (sentences.length === 0 || words.length === 0) return 0;
+
+  function countSyllables(word) {
+    word = word.toLowerCase();
+    if (word.length <= 3) return 1;
+    word = word.replace(/(?:[^laeiouy]es|ed|[^laeiouy]e)$/, '');
+    word = word.replace(/^y/, '');
+    const syllables = word.match(/[aeiouy]{1,2}/g);
+    return syllables ? syllables.length : 1;
+  }
+
+  const totalSyllables = words.reduce((sum, word) => sum + countSyllables(word), 0);
+  const avgSyllablesPerWord = totalSyllables / words.length;
+  const avgWordsPerSentence = words.length / sentences.length;
+
+  const gradeLevel = 0.39 * avgWordsPerSentence + 11.8 * avgSyllablesPerWord - 15.59;
+  return Math.max(0, gradeLevel);
+}
+
+function calculateAverageSentenceLength(text) {
+  const sentences = text.split(/[.!?]+/).filter(s => s.trim().length > 0);
+  const words = text.match(/\b\w+\b/g) || [];
+
+  if (sentences.length === 0) return 0;
+  return words.length / sentences.length;
+}
+
+function calculateAverageParagraphLength(text) {
+  const paragraphs = text.split(/\n\s*\n/).filter(p => p.trim().length > 0);
+  const words = text.match(/\b\w+\b/g) || [];
+
+  if (paragraphs.length === 0) return 0;
+  return words.length / paragraphs.length;
+}
+
+function calculateDialogueFrequency(text) {
+  const quotes = (text.match(/[""\u201C\u201D]/g) || []).length;
+  const chars = text.length;
+
+  if (chars === 0) return 0;
+  return (quotes / 2 / chars) * 1000;
+}
+
 // Calculate metrics for a text sample
 function calculateMetrics(text) {
   const toks0 = wordsOnlyLower(text);
@@ -155,6 +203,12 @@ function calculateMetrics(text) {
   // Lexical diversity
   const lexicalDiversity = calculateLexicalDiversity(toks);
 
+  // Additional writing metrics
+  const vocabLevel = calculateFleschKincaid(text);
+  const avgSentenceLength = calculateAverageSentenceLength(text);
+  const avgParagraphLength = calculateAverageParagraphLength(text);
+  const dialogueFrequency = calculateDialogueFrequency(text);
+
   // Top over-represented words vs wordfreq baseline (matching HTML implementation)
   // Apply preprocessing like HTML implementation
   let wordCounts = countItems(toksContent);
@@ -196,6 +250,10 @@ function calculateMetrics(text) {
     ngram_repetition_score: repetitionScore,
     not_x_but_y_per_1k_chars: contrastRate,
     lexical_diversity: lexicalDiversity,
+    vocab_level: vocabLevel,
+    avg_sentence_length: avgSentenceLength,
+    avg_paragraph_length: avgParagraphLength,
+    dialogue_frequency: dialogueFrequency,
     top_over_represented: {
       words: wordOverrep.slice(0, 100),
       bigrams: topBigrams,
@@ -251,7 +309,11 @@ function processModel(data) {
       slop_list_matches_per_1k_words: metrics.slop_list_matches_per_1k_words,
       ngram_repetition_score: metrics.ngram_repetition_score,
       not_x_but_y_per_1k_chars: metrics.not_x_but_y_per_1k_chars,
-      lexical_diversity: metrics.lexical_diversity
+      lexical_diversity: metrics.lexical_diversity,
+      vocab_level: metrics.vocab_level,
+      avg_sentence_length: metrics.avg_sentence_length,
+      avg_paragraph_length: metrics.avg_paragraph_length,
+      dialogue_frequency: metrics.dialogue_frequency
     },
     top_over_represented: metrics.top_over_represented,
     contrast_matches: metrics.contrast_matches
@@ -312,7 +374,11 @@ function processHumanBaseline() {
       slop_list_matches_per_1k_words: metrics.slop_list_matches_per_1k_words,
       ngram_repetition_score: metrics.ngram_repetition_score,
       not_x_but_y_per_1k_chars: metrics.not_x_but_y_per_1k_chars,
-      lexical_diversity: metrics.lexical_diversity
+      lexical_diversity: metrics.lexical_diversity,
+      vocab_level: metrics.vocab_level,
+      avg_sentence_length: metrics.avg_sentence_length,
+      avg_paragraph_length: metrics.avg_paragraph_length,
+      dialogue_frequency: metrics.dialogue_frequency
     },
     top_over_represented: metrics.top_over_represented,
     contrast_matches: metrics.contrast_matches

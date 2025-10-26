@@ -1,5 +1,5 @@
 {
-  "generated_at": "2025-10-26T08:21:29.963Z",
+  "generated_at": "2025-10-26T08:59:54.900Z",
   "model_count": 22,
   "results": [
     {
@@ -18,7 +18,11 @@
           "type_token_ratio": 0.054692487100681635,
           "unique_words": 17564,
           "total_words": 321141
-        }
+        },
+        "vocab_level": 8.458367233116913,
+        "avg_sentence_length": 9.95214831897075,
+        "avg_paragraph_length": 39.04559523809524,
+        "dialogue_frequency": 1.4224731046085408
       },
       "top_over_represented": {
         "words": [
@@ -1547,7 +1551,11 @@
           "type_token_ratio": 0.009821935020189422,
           "unique_words": 93367,
           "total_words": 9505968
-        }
+        },
+        "vocab_level": 5.058997183968323,
+        "avg_sentence_length": 12.388219916880809,
+        "avg_paragraph_length": 36.44593903417894,
+        "dialogue_frequency": 3.475634713251466
       },
       "top_over_represented": {
         "words": [
@@ -2456,7 +2464,609 @@
             "count": 57
           }
         ]
-      }
+      },
+      "contrast_matches": [
+        {
+          "pattern_name": "S1_RE_SIMPLE_BE_NOT_IT_BE",
+          "sentence": "If it is not, he has been cheated. It's a no win game.",
+          "match_text": "If it is not, he has been cheated. It's",
+          "sentence_count": 2
+        },
+        {
+          "pattern_name": "S1_RE_NP_BE_NOT_SEP_THEY_BE",
+          "sentence": "Sapphire, as you know, is chemically the same stone as ruby; both are corundum, but because the colors of sapphire are not as rare as those of ruby, the value is less. This is therefore a bargain.",
+          "match_text": "Sapphire, as you know, is chemically the same stone as ruby; both are corundum, but because the colors of sapphire are not as rare as those of ruby, the value is less. This is",
+          "sentence_count": 2
+        },
+        {
+          "pattern_name": "S1_RE_NP_BE_NOT_SEP_THEY_BE",
+          "sentence": "This one was not set into a ring. It was an enormous star sapphire, well over a hundred carats, but of very poor quality.",
+          "match_text": "This one was not set into a ring. It was",
+          "sentence_count": 2
+        },
+        {
+          "pattern_name": "S1_RE_NOT_BUT",
+          "sentence": "Zane blinked, but the effect remained; the star was not in, but above the stone.",
+          "match_text": "was not in, but",
+          "sentence_count": 1
+        },
+        {
+          "pattern_name": "S1_RE_NP_BE_NOT_SEP_THEY_BE",
+          "sentence": "\"Not pretty, I admit, but my stones aren't marketed primarily for their appearance,\" the proprietor said. \"They are valued for their magic.",
+          "match_text": "\"Not pretty, I admit, but my stones aren't marketed primarily for their appearance,\" the proprietor said. \"They are",
+          "sentence_count": 2
+        },
+        {
+          "pattern_name": "S1_RE_NOT_BUT",
+          "sentence": "Not a lot of it, but of course there would not be much loose change in a shop like this.",
+          "match_text": "Not a lot of it, but",
+          "sentence_count": 1
+        },
+        {
+          "pattern_name": "S1_RE_NOT_BUT",
+          "sentence": "It would not be as good for me as for you, since I am not reduced to your straits, but it remains highly worthwhile.",
+          "match_text": "not be as good for me as for you, since I am not reduced to your straits, but",
+          "sentence_count": 1
+        },
+        {
+          "pattern_name": "S1_RE_PRON_BE_NOT_SEP_BE",
+          "sentence": "This is not something money can bring. It is an opportunity that may occur for me only once in this life.",
+          "match_text": "This is not something money can bring. It is",
+          "sentence_count": 2
+        },
+        {
+          "pattern_name": "S1_RE_PRON_BE_NOT_SEP_BE",
+          "sentence": "\"This is not a purely\n\n    directional thing. It is situational.",
+          "match_text": "\"This is not a purely\n\n    directional thing. It is",
+          "sentence_count": 2
+        },
+        {
+          "pattern_name": "S1_RE_NOT_BUT",
+          "sentence": "The star did not show up well in the artificial light, but he could make it out.",
+          "match_text": "not show up well in the artificial light, but",
+          "sentence_count": 1
+        },
+        {
+          "pattern_name": "S1_RE_NOT_BUT",
+          "sentence": "He was not conversant with firearms, but this one seemed simple enough.",
+          "match_text": "was not conversant with firearms, but",
+          "sentence_count": 1
+        },
+        {
+          "pattern_name": "S1_RE_NOT_BUT",
+          "sentence": "It was not heavy, but it carried a peculiar mass.",
+          "match_text": "was not heavy, but",
+          "sentence_count": 1
+        },
+        {
+          "pattern_name": "S1_RE_NOT_BUT",
+          "sentence": "It is not the right to live, but the right to die that is most important.",
+          "match_text": "is not the right to live, but",
+          "sentence_count": 1
+        },
+        {
+          "pattern_name": "S1_RE_NOT_BUT",
+          "sentence": "\"\n\n    \"Not impossible, but perhaps unfeasible,\" she said.",
+          "match_text": "Not impossible, but",
+          "sentence_count": 1
+        },
+        {
+          "pattern_name": "S1_RE_NOT_BUT",
+          "sentence": "He wasn't sure what would happen if he missed whatever appointment he had, but knew already that these supernatural entities played hardball politics.",
+          "match_text": "wasn't sure what would happen if he missed whatever appointment he had, but",
+          "sentence_count": 1
+        },
+        {
+          "pattern_name": "S1_RE_NOT_BUT",
+          "sentence": "He wasn't sure how he felt about this office, but knew he wasn't ready for that.",
+          "match_text": "wasn't sure how he felt about this office, but",
+          "sentence_count": 1
+        },
+        {
+          "pattern_name": "S1_RE_NOT_BUT",
+          "sentence": "He was coming to understand how this operated; he was not invisible, but he was unnoticeable.",
+          "match_text": "was not invisible, but",
+          "sentence_count": 1
+        },
+        {
+          "pattern_name": "S1_RE_NOT_BUT",
+          "sentence": "He did not know what the normal frequency of clients was, but supposed a backlog had accumulated during the transition, if such a thing were possible.",
+          "match_text": "not know what the normal frequency of clients was, but",
+          "sentence_count": 1
+        },
+        {
+          "pattern_name": "S1_RE_NOT_BUT",
+          "sentence": "Zane was not at all sure he liked this business of collecting souls, but still was hesitant about balking.",
+          "match_text": "was not at all sure he liked this business of collecting souls, but",
+          "sentence_count": 1
+        },
+        {
+          "pattern_name": "S1_RE_NOT_BUT",
+          "sentence": "It may not be valid in non Christian parts of the world, but it is certainly operative here.",
+          "match_text": "not be valid in non Christian parts of the world, but",
+          "sentence_count": 1
+        },
+        {
+          "pattern_name": "S1_RE_NOT_BUT",
+          "sentence": "She blushed to the waist, not with embarrassment, but with fury.",
+          "match_text": "not with embarrassment, but",
+          "sentence_count": 1
+        },
+        {
+          "pattern_name": "S1_RE_NOT_BUT",
+          "sentence": "He was the youngest drug addict I've dealt with well, not the youngest, if you count the potheads, but the worst for this age bracket.",
+          "match_text": "not the youngest, if you count the potheads, but",
+          "sentence_count": 1
+        },
+        {
+          "pattern_name": "S1_RE_NOT_BUT",
+          "sentence": "Zane did not have the answer, but he wasn't easy about it.",
+          "match_text": "not have the answer, but",
+          "sentence_count": 1
+        },
+        {
+          "pattern_name": "S1_RE_NOT_BUT",
+          "sentence": "That was not what Zane had meant, but he kept silent.",
+          "match_text": "was not what Zane had meant, but",
+          "sentence_count": 1
+        },
+        {
+          "pattern_name": "S1_RE_NOT_BUT",
+          "sentence": "He wasn't sure, but suspected it related to some personal aspect.",
+          "match_text": "wasn't sure, but",
+          "sentence_count": 1
+        },
+        {
+          "pattern_name": "S1_RE_NOT_BUT",
+          "sentence": "Zane was not a good typist, but he was adequate.",
+          "match_text": "was not a good typist, but",
+          "sentence_count": 1
+        },
+        {
+          "pattern_name": "S1_RE_NP_BE_NOT_SEP_THEY_BE",
+          "sentence": "But he remained keenly aware that these people were not of his world. They were dead and he was alive.",
+          "match_text": "But he remained keenly aware that these people were not of his world. They were",
+          "sentence_count": 2
+        },
+        {
+          "pattern_name": "S1_RE_NOT_BUT",
+          "sentence": "In one sense, illusion wasn't real, but it could be just as deadly as tangible magic.",
+          "match_text": "wasn't real, but",
+          "sentence_count": 1
+        },
+        {
+          "pattern_name": "S1_RE_PRON_BE_NOT_SEP_BE",
+          "sentence": "It wasn't pretty. It was a large, open cavity, with a dozen sharpened wooden stakes set upright in the bottom.",
+          "match_text": "It wasn't pretty. It was",
+          "sentence_count": 2
+        },
+        {
+          "pattern_name": "S1_RE_NOT_BUT",
+          "sentence": "People seldom saw Death when they were not clients or closely attached to clients, but Death could indeed force his awareness on them when he wished.",
+          "match_text": "were not clients or closely attached to clients, but",
+          "sentence_count": 1
+        },
+        {
+          "pattern_name": "S1_RE_NOT_BUT",
+          "sentence": "The tune did not adapt well to drum and guitar, but the electric organ picked it up easily enough.",
+          "match_text": "not adapt well to drum and guitar, but",
+          "sentence_count": 1
+        },
+        {
+          "pattern_name": "S1_RE_NOT_BUT",
+          "sentence": "\"\n\n    The car did not answer, but the motor purred.",
+          "match_text": "not answer, but",
+          "sentence_count": 1
+        },
+        {
+          "pattern_name": "S1_RE_NOT_BUT",
+          "sentence": "\"\n\n    Not entirely true, but close enough.",
+          "match_text": "Not entirely true, but",
+          "sentence_count": 1
+        },
+        {
+          "pattern_name": "S1_RE_NOT_BUT",
+          "sentence": "\" Actually, it was not as late in Los Angeles as in Kilvarough, but children retired earlier than adults.",
+          "match_text": "was not as late in Los Angeles as in Kilvarough, but",
+          "sentence_count": 1
+        },
+        {
+          "pattern_name": "S1_RE_NOT_BUT",
+          "sentence": "\"\n\n    Zane was not entirely satisfied with this, but let it be.",
+          "match_text": "was not entirely satisfied with this, but",
+          "sentence_count": 1
+        },
+        {
+          "pattern_name": "S1_RE_NOT_BUT",
+          "sentence": "\"\n\n    Zane wasn't sure how the cart had traveled all the way across the great Pacific Ocean to this island, but remembered it was a ghost vehicle not subject to the normal laws of physics.",
+          "match_text": "wasn't sure how the cart had traveled all the way across the great Pacific Ocean to this island, but",
+          "sentence_count": 1
+        },
+        {
+          "pattern_name": "S1_RE_NOT_BUT",
+          "sentence": "She had not been a really attractive girl when seated, but now her cleverness of foot lent her a special allure.",
+          "match_text": "not been a really attractive girl when seated, but",
+          "sentence_count": 1
+        },
+        {
+          "pattern_name": "S1_RE_NP_BE_NOT_SEP_THEY_BE",
+          "sentence": "Physical beauty, Zane realized as he watched, was not entirely in the body; it was in the way the body was moved.",
+          "match_text": "Physical beauty, Zane realized as he watched, was not entirely in the body; it was",
+          "sentence_count": 1
+        },
+        {
+          "pattern_name": "S1_RE_NOT_BUT",
+          "sentence": "\" Zane wasn't satisfied, but had to leave her.",
+          "match_text": "wasn't satisfied, but",
+          "sentence_count": 1
+        },
+        {
+          "pattern_name": "S1_RE_NOT_BUT",
+          "sentence": "The flapping flier seemed not to have noticed the near collision he had participated in, but went his own way without even a salutation.",
+          "match_text": "not to have noticed the near collision he had participated in, but",
+          "sentence_count": 1
+        },
+        {
+          "pattern_name": "S1_RE_PRON_BE_NOT_SEP_BE",
+          "sentence": "This was not ordinary water; this was one of Nature's defenses.",
+          "match_text": "This was not ordinary water; this was",
+          "sentence_count": 1
+        },
+        {
+          "pattern_name": "S1_RE_NOT_BUT",
+          "sentence": "\" he gritted, knowing this was not his own desire, but one imposed from without.",
+          "match_text": "was not his own desire, but",
+          "sentence_count": 1
+        },
+        {
+          "pattern_name": "S1_RE_NOT_BUT",
+          "sentence": "His position did not change, but his awareness of it did.",
+          "match_text": "not change, but",
+          "sentence_count": 1
+        },
+        {
+          "pattern_name": "S1_RE_NOT_BUT",
+          "sentence": "Death was not the calamity of life, but a necessary part of life, the transition to the Afterlife.",
+          "match_text": "was not the calamity of life, but",
+          "sentence_count": 1
+        },
+        {
+          "pattern_name": "S1_RE_NOT_BUT",
+          "sentence": "The tragedy was not dying, but dying out of turn, before the natural course of a given life was run.",
+          "match_text": "was not dying, but",
+          "sentence_count": 1
+        },
+        {
+          "pattern_name": "S1_RE_NOT_BUT",
+          "sentence": "So take it from one who hasn't any right to say it: you should remember your mother, not with guilt or grief, but with gratitude for the pleasure she gave you while she lived, for the way she steered you toward Heaven instead of Hell.",
+          "match_text": "not with guilt or grief, but",
+          "sentence_count": 1
+        },
+        {
+          "pattern_name": "S1_RE_NOT_BUT",
+          "sentence": "He wasn't sure whether this was the same computer he had dealt with before, but suspected that all terminals connected to the same central mechanism.",
+          "match_text": "wasn't sure whether this was the same computer he had dealt with before, but",
+          "sentence_count": 1
+        },
+        {
+          "pattern_name": "S1_RE_NOT_BUT",
+          "sentence": "Did this mean the computer was not permitted to answer directly, but could do so indirectly?",
+          "match_text": "was not permitted to answer directly, but",
+          "sentence_count": 1
+        },
+        {
+          "pattern_name": "S1_RE_NOT_BUT",
+          "sentence": "It might not have any emotion about such an occurrence, but perhaps did have the intelligence not to pursue a self destructive course.",
+          "match_text": "not have any emotion about such an occurrence, but",
+          "sentence_count": 1
+        },
+        {
+          "pattern_name": "S1_RE_NOT_BUT",
+          "sentence": "\"It is true one Incarnation may not safely interfere with another, but since you will it, I can assist.",
+          "match_text": "not safely interfere with another, but",
+          "sentence_count": 1
+        },
+        {
+          "pattern_name": "S1_RE_PRON_BE_NOT_SEP_BE",
+          "sentence": "It was not as if the glass had been inverted, set in an antigravity field, or spelled to levitate; it was a literal reversal of time, as sand rose from the mound below, squeezed through the tight  neck, and shoved the upper sand higher in an even pattern.",
+          "match_text": "It was not as if the glass had been inverted, set in an antigravity field, or spelled to levitate; it was",
+          "sentence_count": 1
+        },
+        {
+          "pattern_name": "S1_RE_NOT_BUT",
+          "sentence": "How the Dragoons had captured this virgin, Zane did not know, but she was surely doomed.",
+          "match_text": "not know, but",
+          "sentence_count": 1
+        },
+        {
+          "pattern_name": "S1_RE_NOT_BUT",
+          "sentence": "Hot Smokers were not large dragons, as this class of reptile went, but their fire breathing made them formidable.",
+          "match_text": "were not large dragons, as this class of reptile went, but",
+          "sentence_count": 1
+        },
+        {
+          "pattern_name": "S1_RE_NP_BE_NOT_SEP_THEY_BE",
+          "sentence": "But Zane knew he was not objective; he loved her.\n\n    This was absolutely crazy!",
+          "match_text": "But Zane knew he was not objective; he loved her.\n\n    This was",
+          "sentence_count": 2
+        },
+        {
+          "pattern_name": "S1_RE_NP_BE_NOT_SEP_THEY_BE",
+          "sentence": "At least the dragons were not sadistic; they killed and fed efficiently. They were natural creatures,  not given to waste.",
+          "match_text": "At least the dragons were not sadistic; they killed and fed efficiently. They were",
+          "sentence_count": 2
+        },
+        {
+          "pattern_name": "S1_RE_NOT_BUT",
+          "sentence": "Maybe the dragoness had not been pausing from alarm, but to work up a higher heat.",
+          "match_text": "not been pausing from alarm, but",
+          "sentence_count": 1
+        },
+        {
+          "pattern_name": "S1_RE_NOT_BUT",
+          "sentence": "\"She is not dead, but neither is she alive.",
+          "match_text": "is not dead, but",
+          "sentence_count": 1
+        },
+        {
+          "pattern_name": "S1_RE_NOT_BUT",
+          "sentence": "Satan can not make you take her soul, but he can make you wish you had.",
+          "match_text": "not make you take her soul, but",
+          "sentence_count": 1
+        },
+        {
+          "pattern_name": "S1_RE_PRON_BE_NOT_SEP_BE",
+          "sentence": "It was not one person suffering now; it was a multitude!",
+          "match_text": "It was not one person suffering now; it was",
+          "sentence_count": 1
+        },
+        {
+          "pattern_name": "S1_RE_NOT_BUT",
+          "sentence": "He had known it would not be easy, but had underestimated the cunning ingenuity of the argument.",
+          "match_text": "not be easy, but",
+          "sentence_count": 1
+        },
+        {
+          "pattern_name": "S1_RE_NOT_BUT",
+          "sentence": "If you have her assurance that your transition will not be made at this time \"\n\n    Zane wasn't sure about that, but thought it worth investigating.",
+          "match_text": "wasn't sure about that, but",
+          "sentence_count": 1
+        },
+        {
+          "pattern_name": "S1_RE_NOT_BUT",
+          "sentence": "It is not merely the labor, but the attitude, that counts; the soul must sincerely repent its prior evil.",
+          "match_text": "is not merely the labor, but",
+          "sentence_count": 1
+        },
+        {
+          "pattern_name": "S1_RE_NOT_BUT",
+          "sentence": "\" He had not changed his mind about Luna, but realized it would be nice if he could in some fashion accommodate Satan's worthy purpose.",
+          "match_text": "not changed his mind about Luna, but",
+          "sentence_count": 1
+        },
+        {
+          "pattern_name": "S1_RE_NP_BE_NOT_SEP_THEY_BE",
+          "sentence": "\"Those people in Hell aren't wearing anything,\" she continued. \"They are naked in the snow.",
+          "match_text": "\"Those people in Hell aren't wearing anything,\" she continued. \"They are",
+          "sentence_count": 2
+        },
+        {
+          "pattern_name": "S1_RE_NOT_BUT",
+          "sentence": "He did not want to die himself, but this was now mainly a practical matter rather than fear for himself.",
+          "match_text": "not want to die himself, but",
+          "sentence_count": 1
+        },
+        {
+          "pattern_name": "S1_RE_NOT_BUT",
+          "sentence": "The mantis might not be able to see a stationary target very well, but it could feel what was on its leg.",
+          "match_text": "not be able to see a stationary target very well, but",
+          "sentence_count": 1
+        },
+        {
+          "pattern_name": "S1_RE_NOT_BUT",
+          "sentence": "Not coincidence at all, but deliberate deception.",
+          "match_text": "Not coincidence at all, but",
+          "sentence_count": 1
+        },
+        {
+          "pattern_name": "S1_RE_NOT_BUT",
+          "sentence": "This time she tried not to scream, but an anguished sound squeaked past her constricted throat the sort of sound one might hear from a mouse being run over by the tire of a truck.",
+          "match_text": "not to scream, but",
+          "sentence_count": 1
+        },
+        {
+          "pattern_name": "S1_RE_NOT_BUT",
+          "sentence": "Her flesh surely had not recovered, but she was radiantly beautiful in the Deathhood.",
+          "match_text": "not recovered, but",
+          "sentence_count": 1
+        },
+        {
+          "pattern_name": "S1_RE_NOT_BUT",
+          "sentence": "I faded in and out; the pain did not depart, but at least I was unconscious some of the time.",
+          "match_text": "not depart, but",
+          "sentence_count": 1
+        },
+        {
+          "pattern_name": "S1_RE_NOT_BUT",
+          "sentence": "and that feeding time wasn't for three hours yet, but she resumed banging the moment I went back inside.",
+          "match_text": "wasn't for three hours yet, but",
+          "sentence_count": 1
+        },
+        {
+          "pattern_name": "S1_RE_NOT_BUT",
+          "sentence": "If so, it is better not to grasp unduly at that illusion, but rather to live our lives in such a manner that when we must at last lay them down, we will not be ashamed.",
+          "match_text": "not to grasp unduly at that illusion, but",
+          "sentence_count": 1
+        },
+        {
+          "pattern_name": "S1_RE_NOT_BUT",
+          "sentence": "As with all sentient Culture constructs, its precise character had not been fully mapped out before its construction, but allowed to develop as the drone's mind was put together.",
+          "match_text": "not been fully mapped out before its construction, but",
+          "sentence_count": 1
+        },
+        {
+          "pattern_name": "S1_RE_NP_BE_NOT_SEP_THEY_BE",
+          "sentence": "Its personality - it had been decided - wasn't right for Contact, not even for Special Circumstances. It was unstable, belligerent and insensitive.",
+          "match_text": "Its personality - it had been decided - wasn't right for Contact, not even for Special Circumstances. It was",
+          "sentence_count": 2
+        },
+        {
+          "pattern_name": "S1_RE_NOT_BUT",
+          "sentence": "'What I resent,' it said slowly, from a couple of metres away, 'is not what I have lost, but what I have gained, in coming - even remotely - to resemble fatigued, path-polished geriatrics like you, who haven't even got the human decency to die when they're obsolete.",
+          "match_text": "is not what I have lost, but",
+          "sentence_count": 1
+        },
+        {
+          "pattern_name": "S1_RE_NOT_BUT",
+          "sentence": "They're usually \"mercenaries\", not Culture, but they're human, they're people.",
+          "match_text": "not Culture, but",
+          "sentence_count": 1
+        },
+        {
+          "pattern_name": "S1_RE_NOT_BUT",
+          "sentence": "Not that the unlucky young male was necessarily a complete idiot; all he'd done was sketch out what had been, after all, not a bad idea for a game; but Gurgeh had fallen on him like an avalanche.",
+          "match_text": "not a bad idea for a game; but",
+          "sentence_count": 1
+        },
+        {
+          "pattern_name": "S1_RE_NOT_BUT",
+          "sentence": "The object was to keep talking; not to talk continuously, which any idiot could do, but to pause only when the young man was not signalling - through bodily or facial language, or actually starting to speak - that he wanted to cut in.",
+          "match_text": "not to talk continuously, which any idiot could do, but",
+          "sentence_count": 1
+        },
+        {
+          "pattern_name": "S1_RE_NOT_BUT",
+          "sentence": "He would still be able to play, and he would still be allowed to publish, to register his papers as open for dissemination, and probably many of them would be taken up; not quite so often as before, perhaps, but he would not be frozen out completely.",
+          "match_text": "not quite so often as before, perhaps, but",
+          "sentence_count": 1
+        },
+        {
+          "pattern_name": "S1_RE_PRON_BE_NOT_SEP_BE",
+          "sentence": "It wasn't Mawhrin-Skel or Loash the verbose; it wasn't even the same type. It was a little larger and fatter and it had no aura at all.",
+          "match_text": "It wasn't Mawhrin-Skel or Loash the verbose; it wasn't even the same type. It was",
+          "sentence_count": 2
+        },
+        {
+          "pattern_name": "S1_RE_NOT_BUT",
+          "sentence": "Looking closer, it could be seen that the hills were not solid, but rather stacked, tapering levels of the same bewildering meta-pattern, creating linked, multi-layered pyramids over the fantastic landscape, which, on still closer inspection, had what looked like bizarrely sculpted game-pieces standing on its riotously coloured surface.",
+          "match_text": "were not solid, but",
+          "sentence_count": 1
+        },
+        {
+          "pattern_name": "S1_RE_NOT_BUT",
+          "sentence": "If we let everybody know about Azad we may be pressured into making a decision just by the weight of public opinion… which may not sound like a bad thing, but might prove disastrous.",
+          "match_text": "not sound like a bad thing, but",
+          "sentence_count": 1
+        },
+        {
+          "pattern_name": "S1_RE_NOT_BUT",
+          "sentence": "I'm not asking you to say \"Yes\" unequivocally at this stage, but is there any point in my going on, or have you already decided that you definitely don't want to go?",
+          "match_text": "not asking you to say \"Yes\" unequivocally at this stage, but",
+          "sentence_count": 1
+        },
+        {
+          "pattern_name": "S1_RE_NOT_BUT",
+          "sentence": "All that time; not just away from here, but at least half, probably more, of that stretch spent with no time for keeping abreast of developments in other games, no time to read papers or write them, no time for anything except this one, absurd, obsessive game.",
+          "match_text": "not just away from here, but",
+          "sentence_count": 1
+        },
+        {
+          "pattern_name": "S1_RE_SIMPLE_BE_NOT_IT_BE",
+          "sentence": "That machine was civilianised because it was dangerous and refused to undergo reconstruction therapy; its case is not something that I can decide on. It's a matter for the admissions board concerned.",
+          "match_text": "That machine was civilianised because it was dangerous and refused to undergo reconstruction therapy; its case is not something that I can decide on. It's",
+          "sentence_count": 2
+        },
+        {
+          "pattern_name": "S1_RE_NOT_BUT",
+          "sentence": "Not the old-timer they might have expected, but probably harmless enough.",
+          "match_text": "Not the old-timer they might have expected, but",
+          "sentence_count": 1
+        },
+        {
+          "pattern_name": "S1_RE_NOT_BUT",
+          "sentence": "I mean, you can mention blister-free callousing and that sort of thing, that isn't important; but even the gross re-plumbing involved in your own genital design would cause something of a furore if they found out about it.",
+          "match_text": "isn't important; but",
+          "sentence_count": 1
+        },
+        {
+          "pattern_name": "S1_RE_NOT_BUT",
+          "sentence": "'It is especially important to remember that the ownership of humans is possible too; not in terms of actual slavery, which they are proud to have abolished, but in the sense that, according to which sex and class one belongs to, one may be partially owned by another or others by having to sell one's labour or talents to somebody with the means to buy them.",
+          "match_text": "not in terms of actual slavery, which they are proud to have abolished, but",
+          "sentence_count": 1
+        },
+        {
+          "pattern_name": "S1_RE_NOT_BUT",
+          "sentence": "He wasn't sure himself why he was pulling his punches in this way, but somehow it seemed important not to let Contact know everything, to keep something back. It was a small victory against them, a little game, a gesture on a lesser board; a blow against the elements and the gods.",
+          "match_text": "wasn't sure himself why he was pulling his punches in this way, but",
+          "sentence_count": 2
+        },
+        {
+          "pattern_name": "S1_RE_NP_BE_NOT_SEP_THEY_BE",
+          "sentence": "The palace wasn't as immense as Gurgeh had expected, though still impressive enough; it was ornately decorated and brightly illuminated, and from each of its many spires and towers, long, richly decorated banners waved sinuously, slow brilliant waves of heraldry against the orange-black sky.",
+          "match_text": "The palace wasn't as immense as Gurgeh had expected, though still impressive enough; it was",
+          "sentence_count": 1
+        },
+        {
+          "pattern_name": "S1_RE_NOT_BUT",
+          "sentence": "When it finally became obvious, he began playing properly, hoping he would not be made to look too silly in the rush, but over the next few turns he realised the others were still unsure exactly who held what, and he was the only one playing the game as though it was in its final stages.",
+          "match_text": "not be made to look too silly in the rush, but",
+          "sentence_count": 1
+        },
+        {
+          "pattern_name": "S1_RE_NOT_BUT",
+          "sentence": "'I know Sho-Za said you must not move, but will you?",
+          "match_text": "not move, but",
+          "sentence_count": 1
+        },
+        {
+          "pattern_name": "S1_RE_NOT_BUT",
+          "sentence": "This is not your concern, but she's my friend…'\n\n 'What can I do?",
+          "match_text": "is not your concern, but",
+          "sentence_count": 1
+        },
+        {
+          "pattern_name": "S1_RE_NOT_BUT",
+          "sentence": "Your views may not matter a jot in terms of the elective properties of the game, but they do need to keep a record of what sort of player wins what sort of match… besides which, they will be interested in what sort of extremist politics you give credence to.",
+          "match_text": "not matter a jot in terms of the elective properties of the game, but",
+          "sentence_count": 1
+        },
+        {
+          "pattern_name": "S1_RE_NOT_BUT",
+          "sentence": "This might not be your fault, because every society imposes some of its values on those raised within it, but the point is that some societies try to maximise that effect, and some try to minimise it.",
+          "match_text": "not be your fault, because every society imposes some of its values on those raised within it, but",
+          "sentence_count": 1
+        },
+        {
+          "pattern_name": "S1_RE_NP_BE_NOT_SEP_THEY_BE",
+          "sentence": "You cannot choose not to have the politics you do; they are not some separate set of entities somehow detachable from the rest of your being; they are a function of your existence.",
+          "match_text": "You cannot choose not to have the politics you do; they are not some separate set of entities somehow detachable from the rest of your being; they are",
+          "sentence_count": 1
+        },
+        {
+          "pattern_name": "S1_RE_NOT_BUT",
+          "sentence": "His winning margin wasn't great, but it was a win.",
+          "match_text": "wasn't great, but",
+          "sentence_count": 1
+        },
+        {
+          "pattern_name": "S1_RE_NOT_BUT",
+          "sentence": "He did not dip again as he'd expected, but kept going up into the fragrant warmth of the city night.",
+          "match_text": "not dip again as he'd expected, but",
+          "sentence_count": 1
+        },
+        {
+          "pattern_name": "S1_RE_NP_BE_NOT_SEP_THEY_BE",
+          "sentence": "These people aren't paying anything to watch this, either. This is simply an old guy getting beaten up, probably just for the sake of it, and these people would rather watch than do anything to stop it.",
+          "match_text": "These people aren't paying anything to watch this, either. This is",
+          "sentence_count": 2
+        },
+        {
+          "pattern_name": "S1_RE_NOT_BUT",
+          "sentence": "It was clear that the delight being taken in Level Two was not the vicarious pleasure of watching people enjoying themselves and identifying with them, but in seeing people being humiliated while others enjoyed themselves at their expense.",
+          "match_text": "was not the vicarious pleasure of watching people enjoying themselves and identifying with them, but",
+          "sentence_count": 1
+        }
+      ]
     },
     {
       "model": "openai/gpt-5-mini",
@@ -2474,7 +3084,11 @@
           "type_token_ratio": 0.044987319969361554,
           "unique_words": 22671,
           "total_words": 503942
-        }
+        },
+        "vocab_level": 6.555948808362185,
+        "avg_sentence_length": 15.117565124618439,
+        "avg_paragraph_length": 69.33695799918445,
+        "dialogue_frequency": 1.447854329974368
       },
       "top_over_represented": {
         "words": [
@@ -4003,7 +4617,11 @@
           "type_token_ratio": 0.03386197359464325,
           "unique_words": 17361,
           "total_words": 512699
-        }
+        },
+        "vocab_level": 9.894368793428942,
+        "avg_sentence_length": 24.318720268631658,
+        "avg_paragraph_length": 95.71255506607929,
+        "dialogue_frequency": 0.6936672304430651
       },
       "top_over_represented": {
         "words": [
@@ -5532,7 +6150,11 @@
           "type_token_ratio": 0.055554063850925005,
           "unique_words": 24828,
           "total_words": 446916
-        }
+        },
+        "vocab_level": 6.4460477029452115,
+        "avg_sentence_length": 14.226003788466913,
+        "avg_paragraph_length": 76.1755902893249,
+        "dialogue_frequency": 1.6509070998865496
       },
       "top_over_represented": {
         "words": [
@@ -7061,7 +7683,11 @@
           "type_token_ratio": 0.054285696018004655,
           "unique_words": 16981,
           "total_words": 312808
-        }
+        },
+        "vocab_level": 6.042153830037165,
+        "avg_sentence_length": 11.168292176800167,
+        "avg_paragraph_length": 34.53320500481232,
+        "dialogue_frequency": 2.7403662998972362
       },
       "top_over_represented": {
         "words": [
@@ -8590,7 +9216,11 @@
           "type_token_ratio": 0.05490961990976516,
           "unique_words": 24572,
           "total_words": 447499
-        }
+        },
+        "vocab_level": 6.112651763311565,
+        "avg_sentence_length": 13.355326077390208,
+        "avg_paragraph_length": 65.99637576109018,
+        "dialogue_frequency": 1.728212777634811
       },
       "top_over_represented": {
         "words": [
@@ -10119,7 +10749,11 @@
           "type_token_ratio": 0.06620415163034257,
           "unique_words": 28876,
           "total_words": 436166
-        }
+        },
+        "vocab_level": 6.6790037128120225,
+        "avg_sentence_length": 12.269288244410006,
+        "avg_paragraph_length": 51.36272011121409,
+        "dialogue_frequency": 2.160590377059946
       },
       "top_over_represented": {
         "words": [
@@ -11648,7 +12282,11 @@
           "type_token_ratio": 0.05506473580622646,
           "unique_words": 17514,
           "total_words": 318062
-        }
+        },
+        "vocab_level": 7.770660769644024,
+        "avg_sentence_length": 13.767878225670433,
+        "avg_paragraph_length": 39.472799806576404,
+        "dialogue_frequency": 2.381601616874648
       },
       "top_over_represented": {
         "words": [
@@ -13177,7 +13815,11 @@
           "type_token_ratio": 0.04363441785579889,
           "unique_words": 27481,
           "total_words": 629801
-        }
+        },
+        "vocab_level": 5.76537116059238,
+        "avg_sentence_length": 10.906799729364005,
+        "avg_paragraph_length": 61.398781184536276,
+        "dialogue_frequency": 1.4659848839596352
       },
       "top_over_represented": {
         "words": [
@@ -14706,7 +15348,11 @@
           "type_token_ratio": 0.036468423533705385,
           "unique_words": 11991,
           "total_words": 328805
-        }
+        },
+        "vocab_level": 6.8047332966766305,
+        "avg_sentence_length": 15.026260173568955,
+        "avg_paragraph_length": 72.64543478260869,
+        "dialogue_frequency": 0.8757566219155216
       },
       "top_over_represented": {
         "words": [
@@ -16235,7 +16881,11 @@
           "type_token_ratio": 0.05236209196895716,
           "unique_words": 22488,
           "total_words": 429471
-        }
+        },
+        "vocab_level": 6.0975975595860525,
+        "avg_sentence_length": 12.173657882234581,
+        "avg_paragraph_length": 58.05037313432836,
+        "dialogue_frequency": 1.506514044578972
       },
       "top_over_represented": {
         "words": [
@@ -17764,7 +18414,11 @@
           "type_token_ratio": 0.05586993845257501,
           "unique_words": 18028,
           "total_words": 322678
-        }
+        },
+        "vocab_level": 5.173683997591024,
+        "avg_sentence_length": 10.62048522730934,
+        "avg_paragraph_length": 35.993448351168375,
+        "dialogue_frequency": 1.9657530017797271
       },
       "top_over_represented": {
         "words": [
@@ -19293,7 +19947,11 @@
           "type_token_ratio": 0.05321665962742597,
           "unique_words": 12978,
           "total_words": 243871
-        }
+        },
+        "vocab_level": 7.301415967986944,
+        "avg_sentence_length": 15.760373049105443,
+        "avg_paragraph_length": 60.73716381418093,
+        "dialogue_frequency": 0.979544464555689
       },
       "top_over_represented": {
         "words": [
@@ -20822,7 +21480,11 @@
           "type_token_ratio": 0.04919818706745138,
           "unique_words": 15490,
           "total_words": 314849
-        }
+        },
+        "vocab_level": 5.543040911968678,
+        "avg_sentence_length": 11.323194856577645,
+        "avg_paragraph_length": 30.44325197074746,
+        "dialogue_frequency": 2.0268901674613646
       },
       "top_over_represented": {
         "words": [
@@ -22351,7 +23013,11 @@
           "type_token_ratio": 0.05637474097502454,
           "unique_words": 20676,
           "total_words": 366760
-        }
+        },
+        "vocab_level": 6.462904139242568,
+        "avg_sentence_length": 11.657823277880084,
+        "avg_paragraph_length": 73.91747476746487,
+        "dialogue_frequency": 1.2900785390483744
       },
       "top_over_represented": {
         "words": [
@@ -23880,7 +24546,11 @@
           "type_token_ratio": 0.051360339478852025,
           "unique_words": 18857,
           "total_words": 367151
-        }
+        },
+        "vocab_level": 6.688489676661806,
+        "avg_sentence_length": 10.53826181635445,
+        "avg_paragraph_length": 41.04273132543221,
+        "dialogue_frequency": 1.87706311782689
       },
       "top_over_represented": {
         "words": [
@@ -25409,7 +26079,11 @@
           "type_token_ratio": 0.07439682451381094,
           "unique_words": 22735,
           "total_words": 305591
-        }
+        },
+        "vocab_level": 5.176336612302801,
+        "avg_sentence_length": 9.70015029291783,
+        "avg_paragraph_length": 31.365069919666766,
+        "dialogue_frequency": 3.433581801538015
       },
       "top_over_represented": {
         "words": [
@@ -26938,7 +27612,11 @@
           "type_token_ratio": 0.049713909481345575,
           "unique_words": 18046,
           "total_words": 362997
-        }
+        },
+        "vocab_level": 7.3003920597292336,
+        "avg_sentence_length": 11.160848179473337,
+        "avg_paragraph_length": 42.34949357004666,
+        "dialogue_frequency": 1.6556489545474493
       },
       "top_over_represented": {
         "words": [
@@ -28467,7 +29145,11 @@
           "type_token_ratio": 0.046932768162015776,
           "unique_words": 13951,
           "total_words": 297255
-        }
+        },
+        "vocab_level": 5.930677700255828,
+        "avg_sentence_length": 13.367824739986723,
+        "avg_paragraph_length": 52.30233766233766,
+        "dialogue_frequency": 1.6495372414984926
       },
       "top_over_represented": {
         "words": [
@@ -29996,7 +30678,11 @@
           "type_token_ratio": 0.048795209523581864,
           "unique_words": 16330,
           "total_words": 334664
-        }
+        },
+        "vocab_level": 8.268374453578133,
+        "avg_sentence_length": 13.524372985297587,
+        "avg_paragraph_length": 54.88720485003191,
+        "dialogue_frequency": 1.5480383008269365
       },
       "top_over_represented": {
         "words": [
@@ -31525,7 +32211,11 @@
           "type_token_ratio": 0.0536162883188079,
           "unique_words": 18739,
           "total_words": 349502
-        }
+        },
+        "vocab_level": 7.145432675348047,
+        "avg_sentence_length": 12.374712483446016,
+        "avg_paragraph_length": 52.12566059894304,
+        "dialogue_frequency": 1.703727715365062
       },
       "top_over_represented": {
         "words": [

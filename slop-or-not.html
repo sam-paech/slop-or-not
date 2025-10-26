@@ -265,6 +265,59 @@ async function readFilesContent() {
   return contents.join('\n\n');
 }
 
+// Additional text analytics functions
+function calculateFleschKincaid(text) {
+  // Split into sentences (approximate)
+  const sentences = text.split(/[.!?]+/).filter(s => s.trim().length > 0);
+  const words = text.match(/\b\w+\b/g) || [];
+
+  if (sentences.length === 0 || words.length === 0) return 0;
+
+  // Count syllables (simplified algorithm)
+  function countSyllables(word) {
+    word = word.toLowerCase();
+    if (word.length <= 3) return 1;
+    word = word.replace(/(?:[^laeiouy]es|ed|[^laeiouy]e)$/, '');
+    word = word.replace(/^y/, '');
+    const syllables = word.match(/[aeiouy]{1,2}/g);
+    return syllables ? syllables.length : 1;
+  }
+
+  const totalSyllables = words.reduce((sum, word) => sum + countSyllables(word), 0);
+  const avgSyllablesPerWord = totalSyllables / words.length;
+  const avgWordsPerSentence = words.length / sentences.length;
+
+  // Flesch-Kincaid Grade Level formula
+  const gradeLevel = 0.39 * avgWordsPerSentence + 11.8 * avgSyllablesPerWord - 15.59;
+  return Math.max(0, gradeLevel);
+}
+
+function calculateAverageSentenceLength(text) {
+  const sentences = text.split(/[.!?]+/).filter(s => s.trim().length > 0);
+  const words = text.match(/\b\w+\b/g) || [];
+
+  if (sentences.length === 0) return 0;
+  return words.length / sentences.length;
+}
+
+function calculateAverageParagraphLength(text) {
+  const paragraphs = text.split(/\n\s*\n/).filter(p => p.trim().length > 0);
+  const words = text.match(/\b\w+\b/g) || [];
+
+  if (paragraphs.length === 0) return 0;
+  return words.length / paragraphs.length;
+}
+
+function calculateDialogueFrequency(text) {
+  // Count quotation marks (both straight and curly)
+  const quotes = (text.match(/[""\u201C\u201D]/g) || []).length;
+  const chars = text.length;
+
+  if (chars === 0) return 0;
+  // Divide by 2 (pairs of quotes) and normalize to per 1000 chars
+  return (quotes / 2 / chars) * 1000;
+}
+
 function renderPills(targetEl, items, fmt = (w, v) => `<b>${w}</b> <span class="muted">(${v})</span>`, showLimit = 10) {
   if (!items.length) {
     targetEl.innerHTML = '<span class="muted">None found</span>';
@@ -353,6 +406,10 @@ async function loadLeaderboard() {
   // Compute normalization ranges with 10% buffer
   const slopVals = leaderboardData.map(r => r.metrics.slop_list_matches_per_1k_words);
   const contrastVals = leaderboardData.map(r => r.metrics.not_x_but_y_per_1k_chars);
+  const vocabVals = leaderboardData.map(r => r.metrics.vocab_level || 0);
+  const sentenceLengthVals = leaderboardData.map(r => r.metrics.avg_sentence_length || 0);
+  const paragraphLengthVals = leaderboardData.map(r => r.metrics.avg_paragraph_length || 0);
+  const dialogueVals = leaderboardData.map(r => r.metrics.dialogue_frequency || 0);
 
   const computeRange = (values) => {
     const min = Math.min(...values);
@@ -366,7 +423,11 @@ async function loadLeaderboard() {
 
   normalizationRanges = {
     slop: computeRange(slopVals),
-    contrast: computeRange(contrastVals)
+    contrast: computeRange(contrastVals),
+    vocab_level: computeRange(vocabVals),
+    avg_sentence_length: computeRange(sentenceLengthVals),
+    avg_paragraph_length: computeRange(paragraphLengthVals),
+    dialogue_frequency: computeRange(dialogueVals)
   };
 
   console.log('Normalization ranges:', normalizationRanges);
@@ -507,6 +568,58 @@ function updateRightPanel(entry) {
         <div class="modal-metric-value">${data.metrics.not_x_but_y_per_1k_chars.toFixed(2)}</div>
       </div>
     `;
+
+    // Writing Style Metrics
+    if (data.metrics.vocab_level !== undefined ||
+        data.metrics.avg_sentence_length !== undefined ||
+        data.metrics.avg_paragraph_length !== undefined ||
+        data.metrics.dialogue_frequency !== undefined) {
+      html += `<h4 style="margin-top: 16px;">Writing Style</h4>`;
+
+      if (data.metrics.vocab_level !== undefined) {
+        const normVocab = normalizeValue(data.metrics.vocab_level, normalizationRanges.vocab_level);
+        html += `
+          <div class="modal-metric" title="Flesch-Kincaid grade level - measures vocabulary complexity">
+            <div class="modal-metric-bg diversity" style="width: ${normVocab * 100}%"></div>
+            <div class="modal-metric-label">Vocab Level</div>
+            <div class="modal-metric-value">${data.metrics.vocab_level.toFixed(2)}</div>
+          </div>
+        `;
+      }
+
+      if (data.metrics.avg_sentence_length !== undefined) {
+        const normSentence = normalizeValue(data.metrics.avg_sentence_length, normalizationRanges.avg_sentence_length);
+        html += `
+          <div class="modal-metric" title="Average words per sentence - indicates pacing">
+            <div class="modal-metric-bg diversity" style="width: ${normSentence * 100}%"></div>
+            <div class="modal-metric-label">Sentence Length</div>
+            <div class="modal-metric-value">${data.metrics.avg_sentence_length.toFixed(2)}</div>
+          </div>
+        `;
+      }
+
+      if (data.metrics.avg_paragraph_length !== undefined) {
+        const normParagraph = normalizeValue(data.metrics.avg_paragraph_length, normalizationRanges.avg_paragraph_length);
+        html += `
+          <div class="modal-metric" title="Average words per paragraph - shows structural rhythm">
+            <div class="modal-metric-bg diversity" style="width: ${normParagraph * 100}%"></div>
+            <div class="modal-metric-label">Paragraph Length</div>
+            <div class="modal-metric-value">${data.metrics.avg_paragraph_length.toFixed(2)}</div>
+          </div>
+        `;
+      }
+
+      if (data.metrics.dialogue_frequency !== undefined) {
+        const normDialogue = normalizeValue(data.metrics.dialogue_frequency, normalizationRanges.dialogue_frequency);
+        html += `
+          <div class="modal-metric" title="Quoted dialogue per 1000 characters">
+            <div class="modal-metric-bg diversity" style="width: ${normDialogue * 100}%"></div>
+            <div class="modal-metric-label">Dialogue Frequency</div>
+            <div class="modal-metric-value">${data.metrics.dialogue_frequency.toFixed(2)}</div>
+          </div>
+        `;
+      }
+    }
 
     if (data.metrics.lexical_diversity) {
       html += `<h4 style="margin-top: 16px;">Lexical Diversity</h4>`;
@@ -673,6 +786,58 @@ function showDetailModal(entry) {
         <div class="modal-metric-value">${data.metrics.not_x_but_y_per_1k_chars.toFixed(2)}</div>
       </div>
     `;
+
+    // Writing Style Metrics
+    if (data.metrics.vocab_level !== undefined ||
+        data.metrics.avg_sentence_length !== undefined ||
+        data.metrics.avg_paragraph_length !== undefined ||
+        data.metrics.dialogue_frequency !== undefined) {
+      html += `<h4 style="margin-top: 16px;">Writing Style</h4>`;
+
+      if (data.metrics.vocab_level !== undefined) {
+        const normVocab = normalizeValue(data.metrics.vocab_level, normalizationRanges.vocab_level);
+        html += `
+          <div class="modal-metric" title="Flesch-Kincaid grade level - measures vocabulary complexity">
+            <div class="modal-metric-bg diversity" style="width: ${normVocab * 100}%"></div>
+            <div class="modal-metric-label">Vocab Level</div>
+            <div class="modal-metric-value">${data.metrics.vocab_level.toFixed(2)}</div>
+          </div>
+        `;
+      }
+
+      if (data.metrics.avg_sentence_length !== undefined) {
+        const normSentence = normalizeValue(data.metrics.avg_sentence_length, normalizationRanges.avg_sentence_length);
+        html += `
+          <div class="modal-metric" title="Average words per sentence - indicates pacing">
+            <div class="modal-metric-bg diversity" style="width: ${normSentence * 100}%"></div>
+            <div class="modal-metric-label">Sentence Length</div>
+            <div class="modal-metric-value">${data.metrics.avg_sentence_length.toFixed(2)}</div>
+          </div>
+        `;
+      }
+
+      if (data.metrics.avg_paragraph_length !== undefined) {
+        const normParagraph = normalizeValue(data.metrics.avg_paragraph_length, normalizationRanges.avg_paragraph_length);
+        html += `
+          <div class="modal-metric" title="Average words per paragraph - shows structural rhythm">
+            <div class="modal-metric-bg diversity" style="width: ${normParagraph * 100}%"></div>
+            <div class="modal-metric-label">Paragraph Length</div>
+            <div class="modal-metric-value">${data.metrics.avg_paragraph_length.toFixed(2)}</div>
+          </div>
+        `;
+      }
+
+      if (data.metrics.dialogue_frequency !== undefined) {
+        const normDialogue = normalizeValue(data.metrics.dialogue_frequency, normalizationRanges.dialogue_frequency);
+        html += `
+          <div class="modal-metric" title="Quoted dialogue per 1000 characters">
+            <div class="modal-metric-bg diversity" style="width: ${normDialogue * 100}%"></div>
+            <div class="modal-metric-label">Dialogue Frequency</div>
+            <div class="modal-metric-value">${data.metrics.dialogue_frequency.toFixed(2)}</div>
+          </div>
+        `;
+      }
+    }
 
     if (data.metrics.lexical_diversity) {
       html += `<h4 style="margin-top: 16px;">Lexical Diversity</h4>`;
@@ -986,6 +1151,12 @@ ui.btn.addEventListener('click', async () => {
       mattr = simpleTTR;
     }
 
+    // Calculate additional writing metrics
+    const vocabLevel = calculateFleschKincaid(raw);
+    const avgSentenceLength = calculateAverageSentenceLength(raw);
+    const avgParagraphLength = calculateAverageParagraphLength(raw);
+    const dialogueFrequency = calculateDialogueFrequency(raw);
+
     // Compute slop score for user text
     const userSlopScore = computeSlopScore(slop, contrastResult.rate_per_1k);
 
@@ -1003,7 +1174,11 @@ ui.btn.addEventListener('click', async () => {
             type_token_ratio: simpleTTR,
             unique_words: uniqueWords.size,
             total_words: nWords
-          }
+          },
+          vocab_level: vocabLevel,
+          avg_sentence_length: avgSentenceLength,
+          avg_paragraph_length: avgParagraphLength,
+          dialogue_frequency: dialogueFrequency
         },
         contrast_matches: contrastResult.matches.slice(0, 100).map(m => ({
           pattern_name: m.pattern_name,
