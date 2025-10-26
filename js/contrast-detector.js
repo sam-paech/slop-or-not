@@ -103,6 +103,8 @@ export function extractContrastMatches(text) {
 
       if (rng) {
         const [lo, hi] = rng;
+        const sentenceSpan = hi - lo + 1;
+
         candidates.push({
           lo,
           hi,
@@ -111,7 +113,12 @@ export function extractContrastMatches(text) {
           pattern_name: `S1_${pname}`,
           match_text: match[0].trim(),
         });
-        console.log(`    Match: "${match[0].substring(0, 60).trim()}..."`);
+
+        console.log(`    Match: "${match[0].substring(0, 60).trim()}..." (${sentenceSpan} sent)`);
+        if (sentenceSpan > 2) {
+          console.warn(`    ⚠ Pattern ${pname} matched ${sentenceSpan} sentences!`);
+          console.warn(`       Full match: "${match[0].substring(0, 150)}..."`);
+        }
       }
     }
   }
@@ -168,6 +175,8 @@ export function extractContrastMatches(text) {
 
           if (rng) {
             const [lo, hi] = rng;
+            const sentenceSpan = hi - lo + 1;
+
             candidates.push({
               lo,
               hi,
@@ -176,7 +185,13 @@ export function extractContrastMatches(text) {
               pattern_name: `S2_${pname}`,
               match_text: tNorm.substring(rs, re).trim(),
             });
-            console.log(`    Match: "${match[0].substring(0, 60)}..."`);
+
+            console.log(`    Match: "${match[0].substring(0, 60)}..." (${sentenceSpan} sent)`);
+            if (sentenceSpan > 2) {
+              console.warn(`    ⚠ Pattern ${pname} matched ${sentenceSpan} sentences!`);
+              console.warn(`       Tagged match: "${match[0].substring(0, 150)}..."`);
+              console.warn(`       Raw text: "${tNorm.substring(rs, re).substring(0, 150)}..."`);
+            }
           }
         }
       }
@@ -196,6 +211,8 @@ export function extractContrastMatches(text) {
   for (const it of merged) {
     const sLo = it.lo;
     const sHi = it.hi;
+    const sentenceSpan = sHi - sLo + 1;
+
     const blockStart = spans[sLo][0];
     const blockEnd = spans[sHi][1];
 
@@ -203,11 +220,18 @@ export function extractContrastMatches(text) {
       sentence: tNorm.substring(blockStart, blockEnd).trim(),
       pattern_name: it.pattern_name,
       match_text: it.match_text,
+      sentence_count: sentenceSpan
     };
     results.push(result);
 
-    console.log(`  Result ${results.length}: ${it.pattern_name}`);
-    console.log(`    Sentence: "${result.sentence.substring(0, 80)}..."`);
+    console.log(`  Result ${results.length}: ${it.pattern_name} (spans ${sentenceSpan} sentence${sentenceSpan > 1 ? 's' : ''})`);
+    if (sentenceSpan > 2) {
+      console.error(`  ❌ BUG: Pattern ${it.pattern_name} matched across ${sentenceSpan} sentences! This is too greedy.`);
+      console.error(`     Match text: "${it.match_text}"`);
+      console.error(`     Full sentence block (first 200 chars): "${result.sentence.substring(0, 200)}..."`);
+    } else {
+      console.log(`    Sentence: "${result.sentence.substring(0, 80)}..."`);
+    }
   }
 
   console.log('\n✅ Final Results:', results.length, 'contrast patterns found');

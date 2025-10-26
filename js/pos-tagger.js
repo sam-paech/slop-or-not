@@ -39,11 +39,26 @@ export async function initPosTagger() {
       }
 
       // Verify it's initialized
-      if (!winkPOS || typeof winkPOS.tagSentence !== 'function') {
+      if (!winkPOS) {
+        throw new Error('winkPOS is null after loading');
+      }
+
+      // Debug: Log the actual API
+      console.log('winkPOS object:', winkPOS);
+      console.log('winkPOS methods:', Object.keys(winkPOS));
+
+      if (typeof winkPOS.tagSentence !== 'function') {
+        console.error('Available methods:', Object.getOwnPropertyNames(winkPOS));
+        console.error('Prototype methods:', Object.getOwnPropertyNames(Object.getPrototypeOf(winkPOS)));
         throw new Error('winkPOS loaded but tagSentence method not found');
       }
 
       console.log('✓ wink-pos-tagger loaded successfully from:', url);
+
+      // Test it works
+      const testResult = winkPOS.tagSentence("The cat sat.");
+      console.log('✓ Test tagging result:', testResult);
+
       return true;
     } catch (e) {
       console.warn(`Failed to load from ${url}:`, e.message);
@@ -86,21 +101,23 @@ export function tagWithPos(text, posType = 'verb') {
 
   for (const token of tagged) {
     let out = token.value;
-    const tag = token.tag;
+    const posTag = token.pos;  // Use 'pos' field, not 'tag'
 
-    if (posType === 'verb' && VERB_TAGS.has(tag)) {
-      out = 'VERB';
-    } else if (posType === 'noun' && NOUN_TAGS.has(tag)) {
-      out = 'NOUN';
-    } else if (posType === 'adj' && ADJ_TAGS.has(tag)) {
-      out = 'ADJ';
-    } else if (posType === 'adv' && ADV_TAGS.has(tag)) {
-      out = 'ADV';
-    } else if (posType === 'all') {
-      if (VERB_TAGS.has(tag)) out = 'VERB';
-      else if (NOUN_TAGS.has(tag)) out = 'NOUN';
-      else if (ADJ_TAGS.has(tag)) out = 'ADJ';
-      else if (ADV_TAGS.has(tag)) out = 'ADV';
+    if (posTag) {
+      if (posType === 'verb' && VERB_TAGS.has(posTag)) {
+        out = 'VERB';
+      } else if (posType === 'noun' && NOUN_TAGS.has(posTag)) {
+        out = 'NOUN';
+      } else if (posType === 'adj' && ADJ_TAGS.has(posTag)) {
+        out = 'ADJ';
+      } else if (posType === 'adv' && ADV_TAGS.has(posTag)) {
+        out = 'ADV';
+      } else if (posType === 'all') {
+        if (VERB_TAGS.has(posTag)) out = 'VERB';
+        else if (NOUN_TAGS.has(posTag)) out = 'NOUN';
+        else if (ADJ_TAGS.has(posTag)) out = 'ADJ';
+        else if (ADV_TAGS.has(posTag)) out = 'ADV';
+      }
     }
 
     result.push(out);
@@ -129,13 +146,29 @@ export function tagStreamWithOffsets(text, posType = 'verb') {
   console.log('POS Tagger output:', tagged.length, 'tokens');
   console.log('Sample tokens:', tagged.slice(0, 10).map(t => `${t.value}/${t.tag}`).join(' '));
 
-  // Debug: Check if we're finding any verbs
-  const verbTokens = tagged.filter(t => VERB_TAGS.has(t.tag));
-  console.log('Verb tokens found:', verbTokens.length);
+  // Debug: Check if we're finding any verbs using the 'pos' field
+  const verbTokens = tagged.filter(t => t.pos && VERB_TAGS.has(t.pos));
+  const totalWords = tagged.filter(t => t.tag === 'word').length;
+  const verbPercentage = totalWords > 0 ? ((verbTokens.length / totalWords) * 100).toFixed(1) : 0;
+
+  console.log(`Verb tokens found: ${verbTokens.length} out of ${totalWords} words (${verbPercentage}%)`);
   if (verbTokens.length > 0) {
-    console.log('Sample verbs:', verbTokens.slice(0, 5).map(t => `${t.value}/${t.tag}`).join(', '));
+    console.log('Sample verbs:', verbTokens.slice(0, 10).map(t => `${t.value}/${t.pos}`).join(', '));
+
+    // Show POS tag distribution
+    const posDistribution = {};
+    verbTokens.forEach(t => {
+      posDistribution[t.pos] = (posDistribution[t.pos] || 0) + 1;
+    });
+    console.log('Verb tag distribution:', posDistribution);
+
+    if (verbPercentage > 25) {
+      console.warn(`⚠ Suspiciously high verb percentage (${verbPercentage}%)! Check VERB_TAGS.`);
+    }
   } else {
-    console.warn('⚠ No verb tokens found! Tag set:', Array.from(new Set(tagged.map(t => t.tag))).join(', '));
+    console.warn('⚠ No verb tokens found!');
+    console.log('Tag field values:', Array.from(new Set(tagged.map(t => t.tag))).join(', '));
+    console.log('POS field values (first 20):', Array.from(new Set(tagged.slice(0, 20).map(t => t.pos).filter(Boolean))).join(', '));
   }
 
   const parts = [];
@@ -145,7 +178,7 @@ export function tagStreamWithOffsets(text, posType = 'verb') {
 
   for (let i = 0; i < tagged.length; i++) {
     const token = tagged[i];
-    const tag = token.tag;
+    const posTag = token.pos;  // Use 'pos' field, not 'tag'
     const value = token.value;
 
     // Find token in original text
@@ -158,19 +191,21 @@ export function tagStreamWithOffsets(text, posType = 'verb') {
 
     // Map token to POS tag if applicable
     let out = value;
-    if (posType === 'verb' && VERB_TAGS.has(tag)) {
-      out = 'VERB';
-    } else if (posType === 'noun' && NOUN_TAGS.has(tag)) {
-      out = 'NOUN';
-    } else if (posType === 'adj' && ADJ_TAGS.has(tag)) {
-      out = 'ADJ';
-    } else if (posType === 'adv' && ADV_TAGS.has(tag)) {
-      out = 'ADV';
-    } else if (posType === 'all') {
-      if (VERB_TAGS.has(tag)) out = 'VERB';
-      else if (NOUN_TAGS.has(tag)) out = 'NOUN';
-      else if (ADJ_TAGS.has(tag)) out = 'ADJ';
-      else if (ADV_TAGS.has(tag)) out = 'ADV';
+    if (posTag) {
+      if (posType === 'verb' && VERB_TAGS.has(posTag)) {
+        out = 'VERB';
+      } else if (posType === 'noun' && NOUN_TAGS.has(posTag)) {
+        out = 'NOUN';
+      } else if (posType === 'adj' && ADJ_TAGS.has(posTag)) {
+        out = 'ADJ';
+      } else if (posType === 'adv' && ADV_TAGS.has(posTag)) {
+        out = 'ADV';
+      } else if (posType === 'all') {
+        if (VERB_TAGS.has(posTag)) out = 'VERB';
+        else if (NOUN_TAGS.has(posTag)) out = 'NOUN';
+        else if (ADJ_TAGS.has(posTag)) out = 'ADJ';
+        else if (ADV_TAGS.has(posTag)) out = 'ADV';
+      }
     }
 
     parts.push(out);
