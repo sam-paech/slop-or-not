@@ -160,13 +160,13 @@ function calculateMetrics(text) {
   wordOverrep.sort((a, b) => b.ratio - a.ratio);
 
   // Top over-represented bigrams and trigrams (using existing function)
-  const topBigrams = topBCounts.slice(0, 10).map(([phrase, ratio, count]) => ({
+  const topBigrams = topBCounts.slice(0, 100).map(([phrase, ratio, count]) => ({
     phrase,
     ratio,
     count
   }));
 
-  const topTrigrams = topTCounts.slice(0, 10).map(([phrase, ratio, count]) => ({
+  const topTrigrams = topTCounts.slice(0, 100).map(([phrase, ratio, count]) => ({
     phrase,
     ratio,
     count
@@ -178,7 +178,7 @@ function calculateMetrics(text) {
     not_x_but_y_per_1k_chars: contrastRate,
     lexical_diversity: lexicalDiversity,
     top_over_represented: {
-      words: wordOverrep.slice(0, 10),
+      words: wordOverrep.slice(0, 100),
       bigrams: topBigrams,
       trigrams: topTrigrams
     }
