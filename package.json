@@ -1,5 +1,7 @@
 {
+  "type": "module",
   "dependencies": {
+    "@msgpack/msgpack": "^3.1.2",
     "wink-pos-tagger": "^2.2.2"
   }
 }

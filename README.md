@@ -12,7 +12,7 @@ Detects overused AI-generated phrases using weighted scoring:
 
 ### 2. **Repetition Score** (%)
 Measures over-use of bigrams and trigrams compared to human writing baselines.
-- Uses SUBTLEX frequency database as baseline
+- Uses wordfreq frequency database as baseline
 - Compares against human-authored text patterns
 - Calculates top 40 over-represented n-grams
 
@@ -90,7 +90,7 @@ The contrast detector implements a 2-stage pipeline matching the Python referenc
 ## Dependencies
 
 - **wink-pos-tagger**: Loaded from CDN (https://cdn.jsdelivr.net/npm/wink-pos-tagger@3.0.2/+esm)
-- **SUBTLEX word frequencies**: Loaded from CDN
+- **wordfreq word frequencies**: Loaded from local data file
 - **Human writing baseline**: Local JSON file in `data/`
 - **Slop lists**: Local JSON files in `data/`
 

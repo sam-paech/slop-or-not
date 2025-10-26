@@ -4,7 +4,7 @@
 import { readFileSync, writeFileSync, readdirSync } from 'fs';
 import { join } from 'path';
 import {
-  loadSUBTLEX,
+  loadWordfreq,
   loadHumanProfile,
   loadSlopSets,
   computeSlopIndex,
@@ -315,11 +315,11 @@ async function main() {
   // Load dependencies
   console.log('\nLoading dependencies...');
   try {
-    await loadSUBTLEX();
-    console.log('  ✓ SUBTLEX loaded');
+    await loadWordfreq();
+    console.log('  ✓ wordfreq loaded');
   } catch (err) {
-    console.error('  ✗ Failed to load SUBTLEX:', err.message);
-    throw new Error('SUBTLEX is required for word frequency analysis');
+    console.error('  ✗ Failed to load wordfreq:', err.message);
+    throw new Error('wordfreq is required for word frequency analysis');
   }
 
   try {

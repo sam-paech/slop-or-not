@@ -1,6 +1,7 @@
 // metrics.js - Core text analysis metrics
 
 import { wordsOnlyLower, alphaTokens, countItems } from './utils.js';
+import { loadWordfreqEnFromFile, loadWordfreqEnFromUrl } from './wordfreq.js';
 
 const STOPWORDS = new Set([
   "a","an","the","and","or","but","if","then","than","as","of","to","in","on","for",
@@ -19,10 +20,7 @@ const FUNCTION_WORDS = new Set([
   "what","when","where","why","how"
 ]);
 
-const SUBTLEX_N = 51_000_000;
-const ZIPF_K = Math.log10(1e9) - Math.log10(SUBTLEX_N);
-
-let zipfMap = new Map();
+let wordfreq = null; // WordfreqEn instance
 let humanBigramFreq = new Map();
 let humanTrigramFreq = new Map();
 let slopWords = new Set();
@@ -30,71 +28,76 @@ let slopBigrams = new Set();
 let slopTrigrams = new Set();
 
 export function lookupZipf(word) {
-  // 1) exact
-  let z = zipfMap.get(word);
-  if (z) return z;
-
-  // 2) possessive strip: dog's -> dog
-  if (word.endsWith("'s")) {
-    const base = word.slice(0, -2);
-    z = zipfMap.get(base);
-    if (z) return z;
-  }
-
-  // 3) decontract common clitics
-  const m = word.match(/^([a-z]+)('(re|ve|ll|d|m))$/) || word.match(/^([a-z]+)(n't)$/i);
-  if (m) {
-    const base = m[1];
-    if (FUNCTION_WORDS.has(base)) return null;
-
-    const clitic = m[2].toLowerCase();
-    z = zipfMap.get(base);
-    if (z) return z;
-
-    const auxMap = { "n't":"not", "'re":"are", "'ve":"have", "'ll":"will", "'d":"would", "'m":"am" };
-    const aux = auxMap[clitic];
-    if (aux) {
-      z = zipfMap.get(aux);
-      if (z) return z;
-    }
-  }
-
-  // 4) apostrophe-stripped fallback
-  const noApos = word.replace(/'/g, "");
-  if (noApos !== word) {
-    z = zipfMap.get(noApos);
-    if (z) return z;
-  }
-
-  return null;
+  if (!wordfreq) return null;
+  
+  const zipf = wordfreq.zipfFrequency(word);
+  return zipf > 0 ? zipf : null;
 }
 
-export async function loadSUBTLEX() {
-  const url = "https://cdn.jsdelivr.net/npm/subtlex-word-frequencies/index.json";
-  const res = await fetch(url);
-  if (!res.ok) throw new Error(`SUBTLEX fetch failed ${res.status}`);
-  const data = await res.json();
+// Get frequency as proportion (0-1) for use as human baseline
+// Does NOT preprocess - expects already normalized word
+export function lookupFrequency(word) {
+  if (!wordfreq) return null;
+  
+  const freq = wordfreq.frequency(word);
+  return freq > 0 ? freq : null;
+}
 
-  if (Array.isArray(data)) {
-    for (const row of data) {
-      if (Array.isArray(row) && row.length >= 2) {
-        const w = String(row[0]).toLowerCase();
-        const c = Number(row[1]) || 0;
-        if (c > 0) zipfMap.set(w, Math.log10(c) + ZIPF_K);
-      } else if (row && typeof row === 'object' && 'word' in row && 'count' in row) {
-        const w = String(row.word).toLowerCase();
-        const c = Number(row.count) || 0;
-        if (c > 0) zipfMap.set(w, Math.log10(c) + ZIPF_K);
+// Known contractions that should NOT have 's removed
+const KNOWN_CONTRACTIONS_S = new Set([
+  "it's", "that's", "what's", "who's", "he's", "she's",
+  "there's", "here's", "where's", "when's", "why's", "how's",
+  "let's"
+]);
+
+// Merge plural/possessive 's with base words (except contractions)
+// This matches the Python preprocessing
+export function mergePossessives(wordCounts) {
+  const merged = new Map();
+  
+  for (const [word, count] of wordCounts.entries()) {
+    if (word.endsWith("'s") && !KNOWN_CONTRACTIONS_S.has(word)) {
+      const baseWord = word.slice(0, -2);
+      if (baseWord) {
+        merged.set(baseWord, (merged.get(baseWord) || 0) + count);
+        continue;
       }
     }
-  } else if (data && typeof data === 'object') {
-    for (const [w, c] of Object.entries(data)) {
-      const cnt = Number(c) || 0;
-      if (cnt > 0) zipfMap.set(w.toLowerCase(), Math.log10(cnt) + ZIPF_K);
-    }
+    merged.set(word, (merged.get(word) || 0) + count);
   }
+  
+  return merged;
+}
 
-  if (zipfMap.size === 0) throw new Error("SUBTLEX parsed but empty.");
+// Filter out words that are mostly numeric
+export function filterNumericWords(wordCounts) {
+  const filtered = new Map();
+  
+  for (const [word, count] of wordCounts.entries()) {
+    const digitCount = (word.match(/\d/g) || []).length;
+    if (word.length > 0 && (digitCount / word.length) > 0.2) {
+      continue; // Skip mostly numeric words
+    }
+    filtered.set(word, count);
+  }
+  
+  return filtered;
+}
+
+// Load wordfreq data
+export async function loadWordfreq() {
+  if (wordfreq) return;
+
+  const isBrowser = typeof window !== 'undefined';
+  const path = isBrowser
+    ? './data/large_en.msgpack.gz'
+    : './data/large_en.msgpack.gz';
+
+  if (isBrowser) {
+    wordfreq = await loadWordfreqEnFromUrl(path);
+  } else {
+    wordfreq = await loadWordfreqEnFromFile(path);
+  }
 }
 
 export async function loadHumanProfile() {

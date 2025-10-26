@@ -41,7 +41,7 @@
   .leaderboard-rank { font-weight: 700; color: var(--accent); min-width: 30px; }
   .leaderboard-name { flex: 0 0 200px; font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .leaderboard-bar-container { flex: 1; height: 24px; background: #10141c; border-radius: 4px; position: relative; overflow: hidden; }
-  .leaderboard-bar { height: 100%; background: linear-gradient(90deg, #3a7fff 0%, #6aa0ff 100%); border-radius: 4px; transition: width 0.6s ease-out; }
+  .leaderboard-bar { height: 100%; background: linear-gradient(90deg, #6fd147 0%, #8fe66a 100%); border-radius: 4px; transition: width 0.6s ease-out; }
   .leaderboard-bar.user-bar { background: linear-gradient(90deg, #ff9d3a 0%, #ffb66a 100%); }
   .leaderboard-score { min-width: 60px; text-align: right; font-weight: 600; font-family: var(--mono); }
   .leaderboard-report-btn { background: transparent; border: 1px solid #3a4f5a; padding: 4px 8px; font-size: 11px; cursor: pointer; color: var(--accent); border-radius: 4px; }
@@ -54,8 +54,12 @@
   .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
   .modal-close { background: transparent; color: var(--muted); cursor: pointer; font-size: 24px; border: none; padding: 0; }
   .modal-close:hover { color: var(--fg); }
-  .modal-metric { display: grid; grid-template-columns: 1fr auto; gap: 12px; padding: 8px 0; border-bottom: 1px solid #2a2f3a; }
+  .modal-metric { display: grid; grid-template-columns: 1fr auto; gap: 12px; padding: 8px 0; border-bottom: 1px solid #2a2f3a; position: relative; }
   .modal-metric:last-child { border-bottom: none; }
+  .modal-metric-bg { position: absolute; left: 0; top: 0; height: 100%; border-radius: 4px; opacity: 0.15; z-index: 0; transition: width 0.6s ease-out; }
+  .modal-metric-bg.slop { background: #6fd147; }
+  .modal-metric-bg.diversity { background: #a855f7; }
+  .modal-metric > div { position: relative; z-index: 1; }
 
   button.secondary { background: transparent; border: 1px solid var(--accent); color: var(--accent); margin-left: 10px; }
   button.secondary:hover { background: var(--accent); color: var(--bg); }
@@ -80,7 +84,7 @@
       <div class="metric"><div>Total words</div><div id="m_words" class="mono">—</div></div>
       <div class="metric"><div>Slop index (per 1k words)</div><div id="m_slop" class="mono">—</div></div>
       <div class="metric"><div>Repetition score (%)</div><div id="m_rep" class="mono">—</div></div>
-      <div class="metric"><div>Contrast patterns (per 1k chars)</div><div id="m_contrast" class="mono">—</div></div>
+      <div class="metric"><div>Not-x-but-y Patterns (per 1k chars)</div><div id="m_contrast" class="mono">—</div></div>
 
       <div class="section">
         <details open>
@@ -96,7 +100,7 @@
           <div id="topTrigrams" style="margin-top:8px;"></div>
         </details>
         <details>
-          <summary>Contrast patterns ("not X, but Y")</summary>
+          <summary>Not-x-but-y Patterns</summary>
           <div id="contrastMatches" style="margin-top:8px;"></div>
         </details>
         <details>
@@ -124,7 +128,7 @@
 <script type="module">
 import { wordsOnlyLower, alphaTokens, countItems } from './js/utils.js';
 import {
-  loadSUBTLEX,
+  loadWordfreq,
   loadHumanProfile,
   loadSlopSets,
   computeSlopIndex,
@@ -132,9 +136,11 @@ import {
   makeNgrams,
   rankOveruseWithCounts,
   extractRepeatedPhrases,
-  lookupZipf,
   humanBigramFreq,
-  humanTrigramFreq
+  humanTrigramFreq,
+  lookupFrequency,
+  mergePossessives,
+  filterNumericWords
 } from './js/metrics.js';
 import { initPosTagger } from './js/pos-tagger.js';
 import { scoreText as scoreContrast } from './js/contrast-detector.js';
@@ -286,7 +292,7 @@ function computeSlopScore(slopIndex, ngramScore, contrastScore) {
   const normNgram = normalizeValue(ngramScore, normalizationRanges.ngram);
   const normContrast = normalizeValue(contrastScore, normalizationRanges.contrast);
 
-  return ((normSlop + normNgram + normContrast) / 3) * 1000;
+  return ((normSlop + normNgram + normContrast) / 3) * 100;
 }
 
 function renderLeaderboard(includeUserResult = false) {
@@ -311,8 +317,8 @@ function renderLeaderboard(includeUserResult = false) {
     });
   }
 
-  // Sort by slop score (lower is better)
-  entries.sort((a, b) => a.slopScore - b.slopScore);
+  // Sort by slop score (higher is worse, so descending)
+  entries.sort((a, b) => b.slopScore - a.slopScore);
 
   // Find max score for bar width calculation
   const maxScore = Math.max(...entries.map(e => e.slopScore));
@@ -355,21 +361,30 @@ function showDetailModal(entry) {
   let html = `<h3>${entry.model}</h3>`;
 
   if (data.metrics) {
+    // Compute normalized values for bars
+    const normSlop = normalizeValue(data.metrics.slop_list_matches_per_1k_words, normalizationRanges.slop);
+    const normNgram = normalizeValue(data.metrics.ngram_repetition_score, normalizationRanges.ngram);
+    const normContrast = normalizeValue(data.metrics.not_x_but_y_per_1k_chars, normalizationRanges.contrast);
+
     html += `
       <div class="modal-metric">
+        <div class="modal-metric-bg slop" style="width: ${entry.slopScore}%"></div>
         <div>Slop Score</div>
         <div class="mono">${entry.slopScore.toFixed(2)}</div>
       </div>
       <div class="modal-metric">
+        <div class="modal-metric-bg slop" style="width: ${normSlop * 100}%"></div>
         <div>Slop List Matches (per 1k words)</div>
         <div class="mono">${data.metrics.slop_list_matches_per_1k_words.toFixed(2)}</div>
       </div>
       <div class="modal-metric">
+        <div class="modal-metric-bg slop" style="width: ${normNgram * 100}%"></div>
         <div>N-gram Repetition Score</div>
         <div class="mono">${data.metrics.ngram_repetition_score.toFixed(4)}</div>
       </div>
       <div class="modal-metric">
-        <div>Contrast Patterns (per 1k chars)</div>
+        <div class="modal-metric-bg slop" style="width: ${normContrast * 100}%"></div>
+        <div>Not-x-but-y Patterns (per 1k chars)</div>
         <div class="mono">${data.metrics.not_x_but_y_per_1k_chars.toFixed(2)}</div>
       </div>
     `;
@@ -378,12 +393,9 @@ function showDetailModal(entry) {
       html += `
         <h4 style="margin-top: 16px;">Lexical Diversity</h4>
         <div class="modal-metric">
+          <div class="modal-metric-bg diversity" style="width: ${data.metrics.lexical_diversity.mattr_500 * 100}%"></div>
           <div>MATTR-500</div>
           <div class="mono">${data.metrics.lexical_diversity.mattr_500.toFixed(4)}</div>
-        </div>
-        <div class="modal-metric">
-          <div>Type-Token Ratio</div>
-          <div class="mono">${data.metrics.lexical_diversity.type_token_ratio.toFixed(4)}</div>
         </div>
         <div class="modal-metric">
           <div>Unique Words</div>
@@ -410,19 +422,70 @@ function showDetailModal(entry) {
       `;
     }
 
-    if (data.top_over_represented && data.top_over_represented.words) {
-      html += `
-        <h4 style="margin-top: 16px;">Top Over-represented Words</h4>
-        <div style="margin-top: 8px;">
-      `;
-      data.top_over_represented.words.slice(0, 10).forEach(w => {
-        html += `<span class="pill"><b>${w.word}</b> <span class="muted">${w.ratio.toFixed(2)}×</span></span>`;
+    // Helper function to render items with show more
+    const renderItemsWithShowMore = (items, title, formatter) => {
+      if (!items || items.length === 0) return '';
+
+      const toggleId = 'modal_' + Math.random().toString(36).substr(2, 9);
+      let itemsHtml = `<h4 style="margin-top: 16px;">${title}</h4><div style="margin-top: 8px;">`;
+
+      const visibleItems = items.slice(0, 10);
+      const hiddenItems = items.slice(10);
+
+      visibleItems.forEach(item => {
+        itemsHtml += formatter(item);
       });
-      html += `</div>`;
+
+      if (hiddenItems.length > 0) {
+        itemsHtml += `<div id="${toggleId}_hidden" style="display:none;">`;
+        hiddenItems.forEach(item => {
+          itemsHtml += formatter(item);
+        });
+        itemsHtml += `</div>`;
+        itemsHtml += `<button class="show-more" id="${toggleId}_btn">Show ${hiddenItems.length} more</button>`;
+      }
+
+      itemsHtml += `</div>`;
+      return itemsHtml;
+    };
+
+    if (data.top_over_represented) {
+      html += renderItemsWithShowMore(
+        data.top_over_represented.words,
+        'Top Over-represented Words',
+        w => `<span class="pill"><b>${w.word}</b> <span class="muted">${w.ratio.toFixed(2)}×</span></span>`
+      );
+
+      html += renderItemsWithShowMore(
+        data.top_over_represented.bigrams,
+        'Top Over-represented Bigrams',
+        b => `<span class="pill"><b>${b.bigram}</b> <span class="muted">${b.ratio.toFixed(2)}×</span></span>`
+      );
+
+      html += renderItemsWithShowMore(
+        data.top_over_represented.trigrams,
+        'Top Over-represented Trigrams',
+        t => `<span class="pill"><b>${t.trigram}</b> <span class="muted">${t.ratio.toFixed(2)}×</span></span>`
+      );
     }
   }
 
   ui.modalBody.innerHTML = html;
+
+  // Add click handlers for show more buttons
+  ui.modalBody.querySelectorAll('.show-more').forEach(btn => {
+    const toggleId = btn.id.replace('_btn', '');
+    const hiddenDiv = document.getElementById(`${toggleId}_hidden`);
+    let expanded = false;
+
+    btn.addEventListener('click', () => {
+      expanded = !expanded;
+      hiddenDiv.style.display = expanded ? 'block' : 'none';
+      const count = btn.textContent.match(/\d+/)[0];
+      btn.textContent = expanded ? 'Show less' : `Show ${count} more`;
+    });
+  });
+
   ui.modal.classList.add('visible');
 }
 
@@ -431,6 +494,8 @@ function hideLeaderboard() {
   ui.input.style.display = 'block';
   ui.viewLeaderboardBtn.style.display = 'inline-block';
   ui.newTextBtn.style.display = 'none';
+  ui.btn.style.display = 'inline-block';
+  ui.status.style.display = 'inline';
 }
 
 function showLeaderboard() {
@@ -438,6 +503,8 @@ function showLeaderboard() {
   ui.leaderboard.classList.add('visible');
   ui.viewLeaderboardBtn.style.display = 'none';
   ui.newTextBtn.style.display = 'inline-block';
+  ui.btn.style.display = 'none';
+  ui.status.style.display = 'none';
   renderLeaderboard(userResult !== null);
 }
 
@@ -457,8 +524,8 @@ async function init() {
       // Continue without POS tagger
     }
 
-    ui.status.textContent = "loading SUBTLEX…";
-    await loadSUBTLEX();
+    ui.status.textContent = "loading wordfreq…";
+    await loadWordfreq();
 
     ui.status.textContent = "loading resources…";
     await Promise.all([loadHumanProfile(), loadSlopSets(), loadLeaderboard()]);
@@ -540,15 +607,23 @@ ui.btn.addEventListener('click', () => {
     }
   };
 
-  // Top over-represented words (vs Zipf baseline)
-  const wordCounts = countItems(toksContent);
+  // Top over-represented words (vs wordfreq baseline)
+  // Apply preprocessing like Python implementation
+  let wordCounts = countItems(toksContent);
+  wordCounts = filterNumericWords(wordCounts);
+  wordCounts = mergePossessives(wordCounts);
+  
+  const totalWords = Array.from(wordCounts.values()).reduce((a, b) => a + b, 0);
   const wordOverrep = [];
+  
   for (const [w, cnt] of wordCounts.entries()) {
-    const zipf = lookupZipf(w);
-    if (zipf === null) continue;
-    const expected = Math.pow(10, zipf - 3);
-    const actual = (cnt / nWords) * 1000;
-    const ratio = actual / (expected + 1e-9);
+    const baselineFreq = lookupFrequency(w); // proportion (0-1)
+    if (!baselineFreq) continue;
+    
+    const modelFreq = cnt / totalWords; // proportion (0-1)
+    const ratio = modelFreq / baselineFreq;
+    
+    // Only show words that are significantly over-represented
     if (ratio > 1.5 && cnt >= 2) {
       wordOverrep.push([w, ratio, cnt]);
     }
