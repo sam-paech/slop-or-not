@@ -119,9 +119,8 @@
   <div id="errors" class="section mono" style="white-space:pre-wrap;color:#ffb4b4;"></div>
   <div class="row">
     <div>
-      <textarea id="input" placeholder="Paste or type your long-form text here…" style="display:none;"></textarea>
-      <div id="fileList"></div>
-      <div class="drop-hint" id="dropHint" style="display:none;">You can also drag and drop .txt files here</div>
+      <textarea id="input" placeholder="Add text to analyse, or drag & drop text files" style="display:none;"></textarea>
+      <div id="fileList"></div>      
       <div id="leaderboard" class="visible"></div>
     </div>
     <div class="panel">
@@ -167,7 +166,6 @@ const ui = {
   errors: document.getElementById('errors'),
   input: document.getElementById('input'),
   fileList: document.getElementById('fileList'),
-  dropHint: document.getElementById('dropHint'),
   leaderboard: document.getElementById('leaderboard'),
   viewLeaderboardBtn: document.getElementById('viewLeaderboardBtn'),
   analyzeTextBtn: document.getElementById('analyzeTextBtn'),
@@ -197,12 +195,10 @@ function renderFileList() {
     ui.fileList.style.display = 'none';
     ui.fileList.classList.remove('visible');
     ui.input.style.display = 'block';
-    ui.dropHint.style.display = 'block';
     return;
   }
 
   ui.input.style.display = 'none';
-  ui.dropHint.style.display = 'none';
   ui.fileList.style.display = 'block';
   ui.fileList.classList.add('visible');
 
@@ -1003,7 +999,6 @@ function hideLeaderboard() {
     renderFileList();
   } else {
     ui.input.style.display = 'block';
-    ui.dropHint.style.display = 'block';
   }
 
   ui.viewLeaderboardBtn.style.display = 'inline-block';
@@ -1016,7 +1011,6 @@ function showLeaderboard() {
   ui.input.style.display = 'none';
   ui.fileList.style.display = 'none';
   ui.fileList.classList.remove('visible');
-  ui.dropHint.style.display = 'none';
   ui.leaderboard.style.display = 'block';
   ui.leaderboard.classList.add('visible');
   ui.viewLeaderboardBtn.style.display = 'none';
