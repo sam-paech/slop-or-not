@@ -54,12 +54,13 @@
   .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
   .modal-close { background: transparent; color: var(--muted); cursor: pointer; font-size: 24px; border: none; padding: 0; }
   .modal-close:hover { color: var(--fg); }
-  .modal-metric { display: grid; grid-template-columns: 1fr auto; gap: 12px; padding: 8px 0; border-bottom: 1px solid #2a2f3a; position: relative; }
+  .modal-metric { display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; border-bottom: 1px solid #2a2f3a; position: relative; }
   .modal-metric:last-child { border-bottom: none; }
-  .modal-metric-bg { position: absolute; left: 0; top: 0; height: 100%; border-radius: 4px; opacity: 0.15; z-index: 0; transition: width 0.6s ease-out; }
+  .modal-metric-bg { position: absolute; left: 0; top: 0; width: 0; height: 100%; border-radius: 4px; opacity: 0.15; z-index: 0; transition: width 0.6s ease-out; }
   .modal-metric-bg.slop { background: #6fd147; }
   .modal-metric-bg.diversity { background: #a855f7; }
-  .modal-metric > div { position: relative; z-index: 1; }
+  .modal-metric-label { position: relative; z-index: 1; text-align: left; }
+  .modal-metric-value { position: relative; z-index: 1; text-align: right; font-weight: 600; font-family: var(--mono); }
 
   button.secondary { background: transparent; border: 1px solid var(--accent); color: var(--accent); margin-left: 10px; }
   button.secondary:hover { background: var(--accent); color: var(--bg); }
@@ -260,7 +261,6 @@ async function loadLeaderboard() {
 
   // Compute normalization ranges with 10% buffer
   const slopVals = leaderboardData.map(r => r.metrics.slop_list_matches_per_1k_words);
-  const ngramVals = leaderboardData.map(r => r.metrics.ngram_repetition_score);
   const contrastVals = leaderboardData.map(r => r.metrics.not_x_but_y_per_1k_chars);
 
   const computeRange = (values) => {
@@ -275,7 +275,6 @@ async function loadLeaderboard() {
 
   normalizationRanges = {
     slop: computeRange(slopVals),
-    ngram: computeRange(ngramVals),
     contrast: computeRange(contrastVals)
   };
 
@@ -287,12 +286,11 @@ function normalizeValue(value, range) {
   return Math.max(0, Math.min(1, normalized));
 }
 
-function computeSlopScore(slopIndex, ngramScore, contrastScore) {
+function computeSlopScore(slopIndex, contrastScore) {
   const normSlop = normalizeValue(slopIndex, normalizationRanges.slop);
-  const normNgram = normalizeValue(ngramScore, normalizationRanges.ngram);
   const normContrast = normalizeValue(contrastScore, normalizationRanges.contrast);
 
-  return ((normSlop + normNgram + normContrast) / 3) * 100;
+  return ((normSlop + normContrast) / 2) * 100;
 }
 
 function renderLeaderboard(includeUserResult = false) {
@@ -301,7 +299,6 @@ function renderLeaderboard(includeUserResult = false) {
     model: entry.model,
     slopScore: computeSlopScore(
       entry.metrics.slop_list_matches_per_1k_words,
-      entry.metrics.ngram_repetition_score,
       entry.metrics.not_x_but_y_per_1k_chars
     ),
     fullData: entry
@@ -363,29 +360,23 @@ function showDetailModal(entry) {
   if (data.metrics) {
     // Compute normalized values for bars
     const normSlop = normalizeValue(data.metrics.slop_list_matches_per_1k_words, normalizationRanges.slop);
-    const normNgram = normalizeValue(data.metrics.ngram_repetition_score, normalizationRanges.ngram);
     const normContrast = normalizeValue(data.metrics.not_x_but_y_per_1k_chars, normalizationRanges.contrast);
 
     html += `
       <div class="modal-metric">
         <div class="modal-metric-bg slop" style="width: ${entry.slopScore}%"></div>
-        <div>Slop Score</div>
-        <div class="mono">${entry.slopScore.toFixed(2)}</div>
+        <div class="modal-metric-label">Slop Score</div>
+        <div class="modal-metric-value">${entry.slopScore.toFixed(2)}</div>
       </div>
       <div class="modal-metric">
         <div class="modal-metric-bg slop" style="width: ${normSlop * 100}%"></div>
-        <div>Slop List Matches (per 1k words)</div>
-        <div class="mono">${data.metrics.slop_list_matches_per_1k_words.toFixed(2)}</div>
-      </div>
-      <div class="modal-metric">
-        <div class="modal-metric-bg slop" style="width: ${normNgram * 100}%"></div>
-        <div>N-gram Repetition Score</div>
-        <div class="mono">${data.metrics.ngram_repetition_score.toFixed(4)}</div>
+        <div class="modal-metric-label">Slop List Matches (per 1k words)</div>
+        <div class="modal-metric-value">${data.metrics.slop_list_matches_per_1k_words.toFixed(2)}</div>
       </div>
       <div class="modal-metric">
         <div class="modal-metric-bg slop" style="width: ${normContrast * 100}%"></div>
-        <div>Not-x-but-y Patterns (per 1k chars)</div>
-        <div class="mono">${data.metrics.not_x_but_y_per_1k_chars.toFixed(2)}</div>
+        <div class="modal-metric-label">Not-x-but-y Patterns (per 1k chars)</div>
+        <div class="modal-metric-value">${data.metrics.not_x_but_y_per_1k_chars.toFixed(2)}</div>
       </div>
     `;
 
@@ -394,16 +385,20 @@ function showDetailModal(entry) {
         <h4 style="margin-top: 16px;">Lexical Diversity</h4>
         <div class="modal-metric">
           <div class="modal-metric-bg diversity" style="width: ${data.metrics.lexical_diversity.mattr_500 * 100}%"></div>
-          <div>MATTR-500</div>
-          <div class="mono">${data.metrics.lexical_diversity.mattr_500.toFixed(4)}</div>
+          <div class="modal-metric-label">MATTR-500</div>
+          <div class="modal-metric-value">${data.metrics.lexical_diversity.mattr_500.toFixed(4)}</div>
         </div>
         <div class="modal-metric">
-          <div>Unique Words</div>
-          <div class="mono">${data.metrics.lexical_diversity.unique_words.toLocaleString()}</div>
+          <div class="modal-metric-label">N-gram Repetition Score</div>
+          <div class="modal-metric-value">${data.metrics.ngram_repetition_score.toFixed(4)}</div>
         </div>
         <div class="modal-metric">
-          <div>Total Words</div>
-          <div class="mono">${data.metrics.lexical_diversity.total_words.toLocaleString()}</div>
+          <div class="modal-metric-label">Unique Words</div>
+          <div class="modal-metric-value">${data.metrics.lexical_diversity.unique_words.toLocaleString()}</div>
+        </div>
+        <div class="modal-metric">
+          <div class="modal-metric-label">Total Words</div>
+          <div class="modal-metric-value">${data.metrics.lexical_diversity.total_words.toLocaleString()}</div>
         </div>
       `;
     }
@@ -412,12 +407,12 @@ function showDetailModal(entry) {
       html += `
         <h4 style="margin-top: 16px;">Sample Info</h4>
         <div class="modal-metric">
-          <div>Sample Count</div>
-          <div class="mono">${data.sample_count}</div>
+          <div class="modal-metric-label">Sample Count</div>
+          <div class="modal-metric-value">${data.sample_count}</div>
         </div>
         <div class="modal-metric">
-          <div>Total Characters</div>
-          <div class="mono">${data.total_chars.toLocaleString()}</div>
+          <div class="modal-metric-label">Total Characters</div>
+          <div class="modal-metric-value">${data.total_chars.toLocaleString()}</div>
         </div>
       `;
     }
@@ -459,13 +454,13 @@ function showDetailModal(entry) {
       html += renderItemsWithShowMore(
         data.top_over_represented.bigrams,
         'Top Over-represented Bigrams',
-        b => `<span class="pill"><b>${b.bigram}</b> <span class="muted">${b.ratio.toFixed(2)}×</span></span>`
+        b => `<span class="pill"><b>${b.phrase}</b> <span class="muted">${b.ratio.toFixed(2)}×</span></span>`
       );
 
       html += renderItemsWithShowMore(
         data.top_over_represented.trigrams,
         'Top Over-represented Trigrams',
-        t => `<span class="pill"><b>${t.trigram}</b> <span class="muted">${t.ratio.toFixed(2)}×</span></span>`
+        t => `<span class="pill"><b>${t.phrase}</b> <span class="muted">${t.ratio.toFixed(2)}×</span></span>`
       );
     }
   }
@@ -578,11 +573,11 @@ ui.btn.addEventListener('click', () => {
 
   const top_bigram_count = topBCounts.reduce((s, r) => s + r[2], 0);
   const top_trigram_count = topTCounts.reduce((s, r) => s + r[2], 0);
-  const total_text_length = toks.length;
+  const content_word_count = toksContent.length;
 
   const repetition_score =
-    total_text_length > 0
-      ? ((top_bigram_count + top_trigram_count) / total_text_length) * 1000
+    content_word_count > 0
+      ? ((top_bigram_count + top_trigram_count) / content_word_count) * 1000
       : 0;
 
   ui.m_rep.textContent = repetition_score.toFixed(4);
@@ -593,7 +588,7 @@ ui.btn.addEventListener('click', () => {
   renderContrastMatches(ui.contrastMatches, contrastResult.matches, 10);
 
   // Compute slop score for user text
-  const userSlopScore = computeSlopScore(slop, repetition_score, contrastResult.rate_per_1k);
+  const userSlopScore = computeSlopScore(slop, contrastResult.rate_per_1k);
 
   // Store user result
   userResult = {

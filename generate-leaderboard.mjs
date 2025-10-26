@@ -11,7 +11,9 @@ import {
   contentTokens,
   makeNgrams,
   rankOveruseWithCounts,
-  lookupZipf,
+  lookupFrequency,
+  mergePossessives,
+  filterNumericWords,
   humanBigramFreq,
   humanTrigramFreq
 } from './js/metrics.js';
@@ -128,9 +130,10 @@ function calculateMetrics(text) {
 
   const top_bigram_count = topBCounts.reduce((s, r) => s + r[2], 0);
   const top_trigram_count = topTCounts.reduce((s, r) => s + r[2], 0);
+  const content_word_count = toksContent.length;
 
-  const repetitionScore = nWords > 0
-    ? ((top_bigram_count + top_trigram_count) / nWords) * 1000
+  const repetitionScore = content_word_count > 0
+    ? ((top_bigram_count + top_trigram_count) / content_word_count) * 1000
     : 0;
 
   // Contrast patterns (using existing function)
@@ -144,15 +147,23 @@ function calculateMetrics(text) {
   // Lexical diversity
   const lexicalDiversity = calculateLexicalDiversity(toks);
 
-  // Top over-represented words vs Zipf baseline (using existing function)
-  const wordCounts = countItems(toksContent);
+  // Top over-represented words vs wordfreq baseline (matching HTML implementation)
+  // Apply preprocessing like HTML implementation
+  let wordCounts = countItems(toksContent);
+  wordCounts = filterNumericWords(wordCounts);
+  wordCounts = mergePossessives(wordCounts);
+  
+  const totalWords = Array.from(wordCounts.values()).reduce((a, b) => a + b, 0);
   const wordOverrep = [];
+  
   for (const [w, cnt] of wordCounts.entries()) {
-    const zipf = lookupZipf(w);
-    if (zipf === null) continue;
-    const expected = Math.pow(10, zipf - 3);
-    const actual = (cnt / nWords) * 1000;
-    const ratio = actual / (expected + 1e-9);
+    const baselineFreq = lookupFrequency(w); // proportion (0-1)
+    if (!baselineFreq) continue;
+    
+    const modelFreq = cnt / totalWords; // proportion (0-1)
+    const ratio = modelFreq / baselineFreq;
+    
+    // Only show words that are significantly over-represented
     if (ratio > 1.5 && cnt >= 2) {
       wordOverrep.push({ word: w, ratio: ratio, count: cnt });
     }
