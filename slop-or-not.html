@@ -8,7 +8,7 @@
   :root { --bg:#0f1115; --fg:#e6e6e6; --muted:#9aa4ad; --card:#171a21; --accent:#6aa0ff; }
   * { box-sizing: border-box; }
   body { margin: 0; padding: 24px; background: var(--bg); color: var(--fg); font: 14px/1.45 ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial; }
-  h1 { font-size: 18px; margin: 0 0 12px; }
+  h1 { font-size: 24px; margin: 0 0 20px; text-align: center; font-weight: 700; }
   .row { display: grid; grid-template-columns: 1fr 380px; gap: 18px; }
   textarea { width: 100%; height: 50vh; padding: 12px; background: var(--card); color: var(--fg); border: 1px solid #2a2f3a; border-radius: 8px; resize: vertical; }
   button { background: var(--accent); color: #0b0f16; border: 0; border-radius: 8px; padding: 10px 14px; font-weight: 600; cursor: pointer; }
@@ -95,6 +95,12 @@
   /* Spinner animation */
   .spinner { display: inline-block; width: 14px; height: 14px; border: 2px solid rgba(255,255,255,0.3); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; margin-left: 8px; vertical-align: middle; }
   @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* Leaderboard header */
+  .leaderboard-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+  .slop-indicator { font-size: 12px; color: var(--muted); }
+  .slop-indicator.left::before { content: '← '; }
+  .slop-indicator.right::after { content: ' →'; }
 </style>
 </head>
 <body>
@@ -406,7 +412,12 @@ function renderLeaderboard(includeUserResult = false) {
   const maxScore = Math.max(...entries.map(e => e.slopScore));
 
   // Render
-  let html = '<h2 style="margin-bottom: 12px;">Leaderboard</h2>';
+  let html = `
+    <div class="leaderboard-header">
+      <span class="slop-indicator left">Less slop</span>
+      <span class="slop-indicator right">More slop</span>
+    </div>
+  `;
   entries.forEach((entry, idx) => {
     const barWidth = (entry.slopScore / maxScore) * 100;
     const rowClass = entry.isUser ? 'leaderboard-row user-result' : 'leaderboard-row';
@@ -952,30 +963,56 @@ ui.btn.addEventListener('click', async () => {
     // Contrast patterns
     const contrastResult = scoreContrast(raw);
 
-  // Compute slop score for user text
-  const userSlopScore = computeSlopScore(slop, contrastResult.rate_per_1k);
+    // Calculate lexical diversity (MATTR-500)
+    const windowSize = 500;
+    const uniqueWords = new Set(toks);
+    const simpleTTR = uniqueWords.size / nWords;
 
-  // Store user result
-  userResult = {
-    slopScore: userSlopScore,
-    fullData: {
-      total_chars: chars,
-      metrics: {
-        slop_list_matches_per_1k_words: slop,
-        ngram_repetition_score: repetition_score,
-        not_x_but_y_per_1k_chars: contrastResult.rate_per_1k,
-        lexical_diversity: {
-          total_words: nWords
-        }
-      },
-      contrast_matches: contrastResult.matches.slice(0, 100).map(m => ({
-        pattern_name: m.pattern_name,
-        sentence: m.sentence,
-        match_text: m.match_text || '',
-        sentence_count: m.sentence_count || 1
-      }))
+    let mattr = 0;
+    if (nWords >= windowSize) {
+      let sumTTR = 0;
+      let windowCount = 0;
+
+      for (let i = 0; i <= nWords - windowSize; i++) {
+        const windowTokens = toks.slice(i, i + windowSize);
+        const windowUnique = new Set(windowTokens);
+        const windowTTR = windowUnique.size / windowSize;
+        sumTTR += windowTTR;
+        windowCount++;
+      }
+
+      mattr = sumTTR / windowCount;
+    } else {
+      mattr = simpleTTR;
     }
-  };
+
+    // Compute slop score for user text
+    const userSlopScore = computeSlopScore(slop, contrastResult.rate_per_1k);
+
+    // Store user result
+    userResult = {
+      slopScore: userSlopScore,
+      fullData: {
+        total_chars: chars,
+        metrics: {
+          slop_list_matches_per_1k_words: slop,
+          ngram_repetition_score: repetition_score,
+          not_x_but_y_per_1k_chars: contrastResult.rate_per_1k,
+          lexical_diversity: {
+            mattr_500: mattr,
+            type_token_ratio: simpleTTR,
+            unique_words: uniqueWords.size,
+            total_words: nWords
+          }
+        },
+        contrast_matches: contrastResult.matches.slice(0, 100).map(m => ({
+          pattern_name: m.pattern_name,
+          sentence: m.sentence,
+          match_text: m.match_text || '',
+          sentence_count: m.sentence_count || 1
+        }))
+      }
+    };
 
   // Top over-represented words (vs wordfreq baseline)
   // Apply preprocessing like Python implementation
