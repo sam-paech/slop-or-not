@@ -99,13 +99,23 @@ export function tagWithPos(text, posType = 'verb') {
   const tagged = winkPOS.tagSentence(text);
   const result = [];
 
-  for (const token of tagged) {
+  for (let i = 0; i < tagged.length; i++) {
+    const token = tagged[i];
     let out = token.value;
     const posTag = token.pos;  // Use 'pos' field, not 'tag'
 
+    // Check if next token is a noun (for VBG/VBN filtering)
+    const nextToken = i < tagged.length - 1 ? tagged[i + 1] : null;
+    const nextIsNoun = nextToken && nextToken.pos && NOUN_TAGS.has(nextToken.pos);
+
     if (posTag) {
       if (posType === 'verb' && VERB_TAGS.has(posTag)) {
-        out = 'VERB';
+        // Skip VBG/VBN if followed by a noun (likely adjective use)
+        if ((posTag === 'VBG' || posTag === 'VBN') && nextIsNoun) {
+          out = token.value;
+        } else {
+          out = 'VERB';
+        }
       } else if (posType === 'noun' && NOUN_TAGS.has(posTag)) {
         out = 'NOUN';
       } else if (posType === 'adj' && ADJ_TAGS.has(posTag)) {
@@ -113,8 +123,14 @@ export function tagWithPos(text, posType = 'verb') {
       } else if (posType === 'adv' && ADV_TAGS.has(posTag)) {
         out = 'ADV';
       } else if (posType === 'all') {
-        if (VERB_TAGS.has(posTag)) out = 'VERB';
-        else if (NOUN_TAGS.has(posTag)) out = 'NOUN';
+        if (VERB_TAGS.has(posTag)) {
+          // Apply same VBG/VBN filter for 'all' mode
+          if ((posTag === 'VBG' || posTag === 'VBN') && nextIsNoun) {
+            out = token.value;
+          } else {
+            out = 'VERB';
+          }
+        } else if (NOUN_TAGS.has(posTag)) out = 'NOUN';
         else if (ADJ_TAGS.has(posTag)) out = 'ADJ';
         else if (ADV_TAGS.has(posTag)) out = 'ADV';
       }
@@ -189,11 +205,21 @@ export function tagStreamWithOffsets(text, posType = 'verb') {
       continue;
     }
 
+    // Check if next token is a noun (for VBG/VBN filtering)
+    const nextToken = i < tagged.length - 1 ? tagged[i + 1] : null;
+    const nextIsNoun = nextToken && nextToken.pos && NOUN_TAGS.has(nextToken.pos);
+
     // Map token to POS tag if applicable
     let out = value;
     if (posTag) {
       if (posType === 'verb' && VERB_TAGS.has(posTag)) {
-        out = 'VERB';
+        // Skip VBG/VBN if followed by a noun (likely adjective use)
+        if ((posTag === 'VBG' || posTag === 'VBN') && nextIsNoun) {
+          // Don't tag as VERB - keep original value
+          out = value;
+        } else {
+          out = 'VERB';
+        }
       } else if (posType === 'noun' && NOUN_TAGS.has(posTag)) {
         out = 'NOUN';
       } else if (posType === 'adj' && ADJ_TAGS.has(posTag)) {
@@ -201,8 +227,14 @@ export function tagStreamWithOffsets(text, posType = 'verb') {
       } else if (posType === 'adv' && ADV_TAGS.has(posTag)) {
         out = 'ADV';
       } else if (posType === 'all') {
-        if (VERB_TAGS.has(posTag)) out = 'VERB';
-        else if (NOUN_TAGS.has(posTag)) out = 'NOUN';
+        if (VERB_TAGS.has(posTag)) {
+          // Apply same VBG/VBN filter for 'all' mode
+          if ((posTag === 'VBG' || posTag === 'VBN') && nextIsNoun) {
+            out = value;
+          } else {
+            out = 'VERB';
+          }
+        } else if (NOUN_TAGS.has(posTag)) out = 'NOUN';
         else if (ADJ_TAGS.has(posTag)) out = 'ADJ';
         else if (ADV_TAGS.has(posTag)) out = 'ADV';
       }

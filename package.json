@@ -1,0 +1,5 @@
+{
+  "dependencies": {
+    "wink-pos-tagger": "^2.2.2"
+  }
+}

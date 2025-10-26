@@ -21,8 +21,10 @@ export const RE_POS_NOT_JUST_VERB_PAST = /\b(?:was|were)\s+not\s+just\s+(?:VERB|
 // 7. Colon separator pattern
 export const RE_POS_COLON_VERB = /:\s+(?:the\s+\w+|it|they)\s+(?:was|were)\s+not\s+just\s+VERB[.!?]\s+(?:[Ii]t|[Tt]hey)\s+(?:was|were)\s+[*_~]?VERB/gi;
 
-// 8. Same verb lemma (simplified - just same VERB tag appearing twice)
-export const RE_LEMMA_SAME_VERB = /\bVERB\b[^.!?]{5,80}?[.!?;—-]\s*[^.!?]{0,40}?\bVERB\b/gi;
+// 8. Same verb lemma - matches specific verb lemmas appearing twice
+// Python uses (REACT|SPEAK|...)\b ... \1 to match same lemma
+// JS uses separate pattern with all verb forms since we can't use backreferences with POS tags
+export const RE_LEMMA_SAME_VERB = /\b(REACT|SPEAK|LISTEN|LEARN|SIGNAL|WARN|DIE|LIVE|TEST|TEACH|AMPLIFY|INTERPRET|TRANSLATE|DECODE|EMIT)\b[^.!?]{5,80}?[.!?;—-]\s*[^.!?]{0,40}?\b\1\b/gi;
 
 // 9. "isn't just VERB" within quotes
 export const RE_POS_ISNT_JUST_VERB = /["'"]\s*(?:[^"'"]{0,100}?\b)?(?:The\s+\w+|It|They|You)\s+(?:isn't|aren't|wasn't|weren't)\s+just\s+VERB[^"'".!?]{0,40}?[—-]\s*(?:it's|they're)\s+[*_~]?VERB/gi;

@@ -228,9 +228,9 @@ export function extractContrastMatches(text) {
     if (sentenceSpan > 2) {
       console.error(`  ❌ BUG: Pattern ${it.pattern_name} matched across ${sentenceSpan} sentences! This is too greedy.`);
       console.error(`     Match text: "${it.match_text}"`);
-      console.error(`     Full sentence block (first 200 chars): "${result.sentence.substring(0, 200)}..."`);
+      console.error(`     Full sentence block: "${result.sentence.substring(0, 2000)}..."`);
     } else {
-      console.log(`    Sentence: "${result.sentence.substring(0, 80)}..."`);
+      console.log(`    Sentence: "${result.sentence.substring(0, 800)}..."`);
     }
   }
 
