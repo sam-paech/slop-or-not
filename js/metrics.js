@@ -149,32 +149,53 @@ export async function loadSlopSets() {
   await loadSet("./data/slop_list_trigrams.json", slopTrigrams);
 }
 
-export function computeSlopIndex(tokens) {
+// Returns separate slop word and trigram scores (per 1k words)
+// Also tracks individual hits with frequencies when trackHits=true
+export function computeSlopIndex(tokens, trackHits = false) {
   const n = tokens.length || 0;
-  if (!n) return 0;
+  if (!n) return { wordScore: 0, trigramScore: 0, wordHits: null, trigramHits: null };
 
-  let wordHits = 0, biHits = 0, triHits = 0;
+  let wordHitCount = 0, triHitCount = 0;
+  const wordHitMap = trackHits ? new Map() : null;
+  const triHitMap = trackHits ? new Map() : null;
 
+  // Single-word matches only (slop_list.json)
   if (slopWords.size) {
-    for (const t of tokens) if (slopWords.has(t)) wordHits++;
-  }
-
-  if (slopBigrams.size && n >= 2) {
-    for (let i = 0; i < n - 1; i++) {
-      const bg = tokens[i] + " " + tokens[i + 1];
-      if (slopBigrams.has(bg)) biHits++;
+    for (const t of tokens) {
+      if (slopWords.has(t)) {
+        wordHitCount++;
+        if (trackHits) {
+          wordHitMap.set(t, (wordHitMap.get(t) || 0) + 1);
+        }
+      }
     }
   }
 
+  // Trigram matches only (slop_list_trigrams.json)
   if (slopTrigrams.size && n >= 3) {
     for (let i = 0; i < n - 2; i++) {
       const tg = tokens[i] + " " + tokens[i + 1] + " " + tokens[i + 2];
-      if (slopTrigrams.has(tg)) triHits++;
+      if (slopTrigrams.has(tg)) {
+        triHitCount++;
+        if (trackHits) {
+          triHitMap.set(tg, (triHitMap.get(tg) || 0) + 1);
+        }
+      }
     }
   }
 
-  const totalScore = wordHits + 2 * biHits + 8 * triHits;
-  return (totalScore / n) * 1000;
+  const wordScore = (wordHitCount / n) * 1000;
+  const trigramScore = (triHitCount / n) * 1000;
+
+  const result = { wordScore, trigramScore };
+
+  if (trackHits) {
+    // Convert to sorted arrays: [[phrase, count], ...]
+    result.wordHits = Array.from(wordHitMap.entries()).sort((a, b) => b[1] - a[1]);
+    result.trigramHits = Array.from(triHitMap.entries()).sort((a, b) => b[1] - a[1]);
+  }
+
+  return result;
 }
 
 export function contentTokens(tokens) {

@@ -606,12 +606,14 @@ async function loadLeaderboard() {
   leaderboardData = data.results;
 
   // Compute normalization ranges with 10% buffer
-  const slopVals = leaderboardData.map(r => r.metrics.slop_list_matches_per_1k_words);
-  const contrastVals = leaderboardData.map(r => r.metrics.not_x_but_y_per_1k_chars);
+  const slopWordVals = leaderboardData.map(r => r.metrics.slop_list_matches_per_1k_words || 0);
+  const slopTrigramVals = leaderboardData.map(r => r.metrics.slop_trigram_matches_per_1k_words || 0);
+  const contrastVals = leaderboardData.map(r => r.metrics.not_x_but_y_per_1k_chars || 0);
   const vocabVals = leaderboardData.map(r => r.metrics.vocab_level || 0);
   const sentenceLengthVals = leaderboardData.map(r => r.metrics.avg_sentence_length || 0);
   const paragraphLengthVals = leaderboardData.map(r => r.metrics.avg_paragraph_length || 0);
   const dialogueVals = leaderboardData.map(r => r.metrics.dialogue_frequency || 0);
+  const mattrVals = leaderboardData.map(r => r.metrics.lexical_diversity?.mattr_500 || 0);
 
   const computeRange = (values) => {
     const min = Math.min(...values);
@@ -624,12 +626,14 @@ async function loadLeaderboard() {
   };
 
   normalizationRanges = {
-    slop: computeRange(slopVals),
+    slop_words: computeRange(slopWordVals),
+    slop_trigrams: computeRange(slopTrigramVals),
     contrast: computeRange(contrastVals),
     vocab_level: computeRange(vocabVals),
     avg_sentence_length: computeRange(sentenceLengthVals),
     avg_paragraph_length: computeRange(paragraphLengthVals),
-    dialogue_frequency: computeRange(dialogueVals)
+    dialogue_frequency: computeRange(dialogueVals),
+    mattr_500: computeRange(mattrVals)
   };
 
   console.log('Normalization ranges:', normalizationRanges);
@@ -640,11 +644,12 @@ function normalizeValue(value, range) {
   return Math.max(0, Math.min(1, normalized));
 }
 
-function computeSlopScore(slopIndex, contrastScore) {
-  const normSlop = normalizeValue(slopIndex, normalizationRanges.slop);
+function computeSlopScore(slopWordScore, slopTrigramScore, contrastScore) {
+  const normWords = normalizeValue(slopWordScore, normalizationRanges.slop_words);
+  const normTrigrams = normalizeValue(slopTrigramScore, normalizationRanges.slop_trigrams);
   const normContrast = normalizeValue(contrastScore, normalizationRanges.contrast);
 
-  return ((normSlop + normContrast) / 2) * 100;
+  return ((normWords + normTrigrams + normContrast) / 3) * 100;
 }
 
 function renderLeaderboard(includeUserResult = false) {
@@ -652,8 +657,9 @@ function renderLeaderboard(includeUserResult = false) {
   const entries = leaderboardData.map(entry => ({
     model: entry.model,
     slopScore: computeSlopScore(
-      entry.metrics.slop_list_matches_per_1k_words,
-      entry.metrics.not_x_but_y_per_1k_chars
+      entry.metrics.slop_list_matches_per_1k_words || 0,
+      entry.metrics.slop_trigram_matches_per_1k_words || 0,
+      entry.metrics.not_x_but_y_per_1k_chars || 0
     ),
     fullData: entry
   }));
@@ -750,26 +756,33 @@ function updateRightPanel(entry) {
 
   if (data.metrics) {
     // Compute normalized values for bars
-    const normSlop = normalizeValue(data.metrics.slop_list_matches_per_1k_words, normalizationRanges.slop);
-    const normContrast = normalizeValue(data.metrics.not_x_but_y_per_1k_chars, normalizationRanges.contrast);
+    const normSlopWords = normalizeValue(data.metrics.slop_list_matches_per_1k_words || 0, normalizationRanges.slop_words);
+    const normSlopTrigrams = normalizeValue(data.metrics.slop_trigram_matches_per_1k_words || 0, normalizationRanges.slop_trigrams);
+    const normContrast = normalizeValue(data.metrics.not_x_but_y_per_1k_chars || 0, normalizationRanges.contrast);
 
     html += `
       <div class="modal-metric metric-with-tooltip">
         <div class="modal-metric-bg slop" style="width: ${entry.slopScore}%"></div>
         <div class="modal-metric-label">Slop Score</div>
         <div class="modal-metric-value">${entry.slopScore.toFixed(2)}</div>
-        <span class="tooltip-text">Combined metric of slop list matches and contrast patterns, normalized across all models</span>
+        <span class="tooltip-text">Combined metric: 1/3 slop words + 1/3 slop trigrams + 1/3 contrast patterns, normalized across all models</span>
       </div>
       <div class="modal-metric metric-with-tooltip">
-        <div class="modal-metric-bg slop" style="width: ${normSlop * 100}%"></div>
-        <div class="modal-metric-label">Slop List Matches (per 1k words)</div>
-        <div class="modal-metric-value">${data.metrics.slop_list_matches_per_1k_words.toFixed(2)}</div>
-        <span class="tooltip-text">Frequency of AI-typical words and phrases that appear unnaturally often in LLM outputs</span>
+        <div class="modal-metric-bg slop" style="width: ${normSlopWords * 100}%"></div>
+        <div class="modal-metric-label">Slop Words (per 1k words)</div>
+        <div class="modal-metric-value">${(data.metrics.slop_list_matches_per_1k_words || 0).toFixed(2)}</div>
+        <span class="tooltip-text">Frequency of AI-typical single words that appear unnaturally often in LLM outputs</span>
+      </div>
+      <div class="modal-metric metric-with-tooltip">
+        <div class="modal-metric-bg slop" style="width: ${normSlopTrigrams * 100}%"></div>
+        <div class="modal-metric-label">Slop Trigrams (per 1k words)</div>
+        <div class="modal-metric-value">${(data.metrics.slop_trigram_matches_per_1k_words || 0).toFixed(2)}</div>
+        <span class="tooltip-text">Frequency of AI-typical 3-word phrases that appear unnaturally often in LLM outputs</span>
       </div>
       <div class="modal-metric metric-with-tooltip">
         <div class="modal-metric-bg slop" style="width: ${normContrast * 100}%"></div>
         <div class="modal-metric-label">Not-x-but-y Patterns (per 1k chars)</div>
-        <div class="modal-metric-value">${data.metrics.not_x_but_y_per_1k_chars.toFixed(2)}</div>
+        <div class="modal-metric-value">${(data.metrics.not_x_but_y_per_1k_chars || 0).toFixed(2)}</div>
         <span class="tooltip-text">Frequency of contrast patterns like "not just X, but Y" which are overused by AI</span>
       </div>
     `;
@@ -834,9 +847,10 @@ function updateRightPanel(entry) {
       html += `<h4 style="margin-top: 16px;">Lexical Diversity</h4>`;
 
       if (data.metrics.lexical_diversity.mattr_500 !== undefined) {
+        const normMattr = normalizeValue(data.metrics.lexical_diversity.mattr_500, normalizationRanges.mattr_500);
         html += `
           <div class="modal-metric metric-with-tooltip">
-            <div class="modal-metric-bg diversity" style="width: ${data.metrics.lexical_diversity.mattr_500 * 100}%"></div>
+            <div class="modal-metric-bg diversity" style="width: ${normMattr * 100}%"></div>
             <div class="modal-metric-label">MATTR-500</div>
             <div class="modal-metric-value">${data.metrics.lexical_diversity.mattr_500.toFixed(4)}</div>
             <span class="tooltip-text">Moving-Average Type-Token Ratio - measures vocabulary diversity using 500-word windows</span>
@@ -844,13 +858,6 @@ function updateRightPanel(entry) {
         `;
       }
 
-      html += `
-        <div class="modal-metric metric-with-tooltip">
-          <div class="modal-metric-label">N-gram Repetition Score</div>
-          <div class="modal-metric-value">${data.metrics.ngram_repetition_score.toFixed(4)}</div>
-          <span class="tooltip-text">Frequency of repeated bigrams and trigrams compared to human writing baseline</span>
-        </div>
-      `;
 
       if (data.metrics.lexical_diversity.unique_words !== undefined) {
         html += `
@@ -940,6 +947,24 @@ function updateRightPanel(entry) {
       );
     }
 
+    // Add slop word hits (only for user-submitted text)
+    if (data.slop_word_hits && data.slop_word_hits.length > 0) {
+      html += renderItemsWithShowMore(
+        data.slop_word_hits,
+        'Slop Word Hits',
+        hit => `<span class="pill"><b>${hit[0]}</b> <span class="muted">(${hit[1]})</span></span>`
+      );
+    }
+
+    // Add slop trigram hits (only for user-submitted text)
+    if (data.slop_trigram_hits && data.slop_trigram_hits.length > 0) {
+      html += renderItemsWithShowMore(
+        data.slop_trigram_hits,
+        'Slop Trigram Hits',
+        hit => `<span class="pill"><b>${hit[0]}</b> <span class="muted">(${hit[1]})</span></span>`
+      );
+    }
+
     // Add contrast matches
     if (data.contrast_matches && data.contrast_matches.length > 0) {
       html += renderItemsWithShowMore(
@@ -977,26 +1002,33 @@ function showDetailModal(entry) {
 
   if (data.metrics) {
     // Compute normalized values for bars
-    const normSlop = normalizeValue(data.metrics.slop_list_matches_per_1k_words, normalizationRanges.slop);
-    const normContrast = normalizeValue(data.metrics.not_x_but_y_per_1k_chars, normalizationRanges.contrast);
+    const normSlopWords = normalizeValue(data.metrics.slop_list_matches_per_1k_words || 0, normalizationRanges.slop_words);
+    const normSlopTrigrams = normalizeValue(data.metrics.slop_trigram_matches_per_1k_words || 0, normalizationRanges.slop_trigrams);
+    const normContrast = normalizeValue(data.metrics.not_x_but_y_per_1k_chars || 0, normalizationRanges.contrast);
 
     html += `
       <div class="modal-metric metric-with-tooltip">
         <div class="modal-metric-bg slop" style="width: ${entry.slopScore}%"></div>
         <div class="modal-metric-label">Slop Score</div>
         <div class="modal-metric-value">${entry.slopScore.toFixed(2)}</div>
-        <span class="tooltip-text">Combined metric of slop list matches and contrast patterns, normalized across all models</span>
+        <span class="tooltip-text">Combined metric: 1/3 slop words + 1/3 slop trigrams + 1/3 contrast patterns, normalized across all models</span>
       </div>
       <div class="modal-metric metric-with-tooltip">
-        <div class="modal-metric-bg slop" style="width: ${normSlop * 100}%"></div>
-        <div class="modal-metric-label">Slop List Matches (per 1k words)</div>
-        <div class="modal-metric-value">${data.metrics.slop_list_matches_per_1k_words.toFixed(2)}</div>
-        <span class="tooltip-text">Frequency of AI-typical words and phrases that appear unnaturally often in LLM outputs</span>
+        <div class="modal-metric-bg slop" style="width: ${normSlopWords * 100}%"></div>
+        <div class="modal-metric-label">Slop Words (per 1k words)</div>
+        <div class="modal-metric-value">${(data.metrics.slop_list_matches_per_1k_words || 0).toFixed(2)}</div>
+        <span class="tooltip-text">Frequency of AI-typical single words that appear unnaturally often in LLM outputs</span>
+      </div>
+      <div class="modal-metric metric-with-tooltip">
+        <div class="modal-metric-bg slop" style="width: ${normSlopTrigrams * 100}%"></div>
+        <div class="modal-metric-label">Slop Trigrams (per 1k words)</div>
+        <div class="modal-metric-value">${(data.metrics.slop_trigram_matches_per_1k_words || 0).toFixed(2)}</div>
+        <span class="tooltip-text">Frequency of AI-typical 3-word phrases that appear unnaturally often in LLM outputs</span>
       </div>
       <div class="modal-metric metric-with-tooltip">
         <div class="modal-metric-bg slop" style="width: ${normContrast * 100}%"></div>
         <div class="modal-metric-label">Not-x-but-y Patterns (per 1k chars)</div>
-        <div class="modal-metric-value">${data.metrics.not_x_but_y_per_1k_chars.toFixed(2)}</div>
+        <div class="modal-metric-value">${(data.metrics.not_x_but_y_per_1k_chars || 0).toFixed(2)}</div>
         <span class="tooltip-text">Frequency of contrast patterns like "not just X, but Y" which are overused by AI</span>
       </div>
     `;
@@ -1061,9 +1093,10 @@ function showDetailModal(entry) {
       html += `<h4 style="margin-top: 16px;">Lexical Diversity</h4>`;
 
       if (data.metrics.lexical_diversity.mattr_500 !== undefined) {
+        const normMattr = normalizeValue(data.metrics.lexical_diversity.mattr_500, normalizationRanges.mattr_500);
         html += `
           <div class="modal-metric metric-with-tooltip">
-            <div class="modal-metric-bg diversity" style="width: ${data.metrics.lexical_diversity.mattr_500 * 100}%"></div>
+            <div class="modal-metric-bg diversity" style="width: ${normMattr * 100}%"></div>
             <div class="modal-metric-label">MATTR-500</div>
             <div class="modal-metric-value">${data.metrics.lexical_diversity.mattr_500.toFixed(4)}</div>
             <span class="tooltip-text">Moving-Average Type-Token Ratio - measures vocabulary diversity using 500-word windows</span>
@@ -1071,13 +1104,6 @@ function showDetailModal(entry) {
         `;
       }
 
-      html += `
-        <div class="modal-metric metric-with-tooltip">
-          <div class="modal-metric-label">N-gram Repetition Score</div>
-          <div class="modal-metric-value">${data.metrics.ngram_repetition_score.toFixed(4)}</div>
-          <span class="tooltip-text">Frequency of repeated bigrams and trigrams compared to human writing baseline</span>
-        </div>
-      `;
 
       if (data.metrics.lexical_diversity.unique_words !== undefined) {
         html += `
@@ -1156,6 +1182,24 @@ function showDetailModal(entry) {
         data.top_over_represented.trigrams,
         'Top Over-represented Trigrams',
         t => `<span class="pill"><b>${t.phrase}</b> <span class="muted">${t.ratio.toFixed(2)}×</span></span>`
+      );
+    }
+
+    // Add slop word hits (only for user-submitted text)
+    if (data.slop_word_hits && data.slop_word_hits.length > 0) {
+      html += renderItemsWithShowMore(
+        data.slop_word_hits,
+        'Slop Word Hits',
+        hit => `<span class="pill"><b>${hit[0]}</b> <span class="muted">(${hit[1]})</span></span>`
+      );
+    }
+
+    // Add slop trigram hits (only for user-submitted text)
+    if (data.slop_trigram_hits && data.slop_trigram_hits.length > 0) {
+      html += renderItemsWithShowMore(
+        data.slop_trigram_hits,
+        'Slop Trigram Hits',
+        hit => `<span class="pill"><b>${hit[0]}</b> <span class="muted">(${hit[1]})</span></span>`
       );
     }
 
@@ -1323,8 +1367,8 @@ ui.btn.addEventListener('click', async () => {
     const toks = alphaTokens(toks0);
     const nWords = toks.length;
 
-    // Slop
-    const slop = computeSlopIndex(toks);
+    // Slop - now returns separate scores and hit tracking
+    const slopResult = computeSlopIndex(toks, true);  // trackHits = true
 
     // Repetition score
     const toksContent = contentTokens(toks);
@@ -1375,8 +1419,12 @@ ui.btn.addEventListener('click', async () => {
     const avgParagraphLength = calculateAverageParagraphLength(raw);
     const dialogueFrequency = calculateDialogueFrequency(raw);
 
-    // Compute slop score for user text
-    const userSlopScore = computeSlopScore(slop, contrastResult.rate_per_1k);
+    // Compute slop score for user text using new 3-component formula
+    const userSlopScore = computeSlopScore(
+      slopResult.wordScore,
+      slopResult.trigramScore,
+      contrastResult.rate_per_1k
+    );
 
     // Store user result
     userResult = {
@@ -1384,7 +1432,8 @@ ui.btn.addEventListener('click', async () => {
       fullData: {
         total_chars: chars,
         metrics: {
-          slop_list_matches_per_1k_words: slop,
+          slop_list_matches_per_1k_words: slopResult.wordScore,
+          slop_trigram_matches_per_1k_words: slopResult.trigramScore,
           ngram_repetition_score: repetition_score,
           not_x_but_y_per_1k_chars: contrastResult.rate_per_1k,
           lexical_diversity: {
@@ -1398,6 +1447,8 @@ ui.btn.addEventListener('click', async () => {
           avg_paragraph_length: avgParagraphLength,
           dialogue_frequency: dialogueFrequency
         },
+        slop_word_hits: slopResult.wordHits,
+        slop_trigram_hits: slopResult.trigramHits,
         contrast_matches: contrastResult.matches.slice(0, 100).map(m => ({
           pattern_name: m.pattern_name,
           sentence: m.sentence,

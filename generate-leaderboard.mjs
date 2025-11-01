@@ -164,8 +164,8 @@ function calculateMetrics(text) {
     return null;
   }
 
-  // Slop index (using existing function)
-  const slopIndex = computeSlopIndex(toks);
+  // Slop index (using existing function) - now returns separate word and trigram scores
+  const slopResult = computeSlopIndex(toks, true);  // trackHits = true to capture top hits
 
   // Repetition score (using existing function)
   const toksContent = contentTokens(toks);
@@ -244,7 +244,8 @@ function calculateMetrics(text) {
   }));
 
   return {
-    slop_list_matches_per_1k_words: slopIndex,
+    slop_list_matches_per_1k_words: slopResult.wordScore,
+    slop_trigram_matches_per_1k_words: slopResult.trigramScore,
     ngram_repetition_score: repetitionScore,
     not_x_but_y_per_1k_chars: contrastRate,
     lexical_diversity: lexicalDiversity,
@@ -252,6 +253,8 @@ function calculateMetrics(text) {
     avg_sentence_length: avgSentenceLength,
     avg_paragraph_length: avgParagraphLength,
     dialogue_frequency: dialogueFrequency,
+    slop_word_hits: slopResult.wordHits ? slopResult.wordHits.slice(0, 50) : [],
+    slop_trigram_hits: slopResult.trigramHits ? slopResult.trigramHits.slice(0, 50) : [],
     top_over_represented: {
       words: wordOverrep.slice(0, 100),
       bigrams: topBigrams,
@@ -305,6 +308,7 @@ function processModel(data) {
     completed_at: modelData.completed_at,
     metrics: {
       slop_list_matches_per_1k_words: metrics.slop_list_matches_per_1k_words,
+      slop_trigram_matches_per_1k_words: metrics.slop_trigram_matches_per_1k_words,
       ngram_repetition_score: metrics.ngram_repetition_score,
       not_x_but_y_per_1k_chars: metrics.not_x_but_y_per_1k_chars,
       lexical_diversity: metrics.lexical_diversity,
@@ -313,6 +317,8 @@ function processModel(data) {
       avg_paragraph_length: metrics.avg_paragraph_length,
       dialogue_frequency: metrics.dialogue_frequency
     },
+    slop_word_hits: metrics.slop_word_hits,
+    slop_trigram_hits: metrics.slop_trigram_hits,
     top_over_represented: metrics.top_over_represented,
     contrast_matches: metrics.contrast_matches
   };
@@ -370,6 +376,7 @@ function processHumanBaseline() {
     completed_at: null,
     metrics: {
       slop_list_matches_per_1k_words: metrics.slop_list_matches_per_1k_words,
+      slop_trigram_matches_per_1k_words: metrics.slop_trigram_matches_per_1k_words,
       ngram_repetition_score: metrics.ngram_repetition_score,
       not_x_but_y_per_1k_chars: metrics.not_x_but_y_per_1k_chars,
       lexical_diversity: metrics.lexical_diversity,
@@ -378,6 +385,8 @@ function processHumanBaseline() {
       avg_paragraph_length: metrics.avg_paragraph_length,
       dialogue_frequency: metrics.dialogue_frequency
     },
+    slop_word_hits: metrics.slop_word_hits,
+    slop_trigram_hits: metrics.slop_trigram_hits,
     top_over_represented: metrics.top_over_represented,
     contrast_matches: metrics.contrast_matches
   };
