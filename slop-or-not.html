@@ -3,13 +3,53 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>Writing Metrics: Slop • Repetition • Contrast • Top n-grams</title>
+<title>Slop-or-Not | EQ-Bench</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <style>
   :root { --bg:#0f1115; --fg:#e6e6e6; --muted:#9aa4ad; --card:#171a21; --accent:#6aa0ff; }
   * { box-sizing: border-box; }
-  body { margin: 0; padding: 24px; background: var(--bg); color: var(--fg); font: 14px/1.45 ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial; }
-  h1 { font-size: 36px; margin: 0 0 20px; text-align: center; font-weight: 700; }
-  .row { display: grid; grid-template-columns: 1fr 380px; gap: 18px; }
+  body { margin: 0; padding: 0; background: var(--bg); color: var(--fg); }
+
+  /* Container */
+  .container { max-width: 1400px; margin: 0 auto; padding: 24px; background: var(--bg); }
+
+  /* EQBench header styles */
+  .header { display: flex; align-items: flex-end; margin-bottom: 10px; }
+  .logo { width: 100px; height: auto; margin-right: 10px; }
+  .header-text h1, .header-text p { margin: 0; }
+
+  /* Dark mode toggle */
+  .form-check { position: fixed; top: 10px; right: 10px; z-index: 1000; }
+  #toggleLabel { margin-right: 8px; }
+
+  /* Navigation styles */
+  .nav-separator { color: var(--muted); margin: 0 4px; }
+  .nav-dropdown { position: relative; display: inline-block; }
+  .nav-dropdown-toggle { background: transparent; border: none; color: var(--accent); cursor: pointer; padding: 0; font-size: 14px; text-decoration: none; }
+  .nav-dropdown-toggle:hover { text-decoration: underline; }
+  .nav-dropdown-menu { display: none; position: absolute; background: var(--card); border: 1px solid #2a2f3a; border-radius: 6px; padding: 8px 0; min-width: 200px; z-index: 100; top: 100%; left: 0; margin-top: 4px; }
+  .nav-dropdown-menu.show { display: block; }
+  .nav-dropdown-item { display: block; padding: 6px 12px; color: var(--accent); text-decoration: none; }
+  .nav-dropdown-item:hover { background: #2a2f3a; }
+
+  /* Slop-specific content font (not applied to header/nav) */
+  .slop-content {
+    font: 14px/1.45 ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial;
+    margin-top: -8px;
+  }
+
+  .slop-content > .section:first-child {
+    margin-top: 8px;
+  }
+
+  /* Light mode base styles */
+  body.dark-mode { background: var(--bg); color: var(--fg); }
+  body.dark-mode .container { background: var(--bg); }
+  .row { display: grid; grid-template-columns: 1fr 380px; gap: 18px; align-items: start; }
+  .row > div:first-child { min-height: 0; }
   textarea { width: 100%; height: 50vh; padding: 12px; background: var(--card); color: var(--fg); border: 1px solid #2a2f3a; border-radius: 8px; resize: vertical; }
   button { background: var(--accent); color: #0b0f16; border: 0; border-radius: 8px; padding: 10px 14px; font-weight: 600; cursor: pointer; }
   button:disabled { opacity: .55; cursor: not-allowed; }
@@ -22,7 +62,7 @@
   .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace; }
   .section { margin-top: 16px; }
   .pill { display: inline-block; background: #10141c; border: 1px solid #2a2f3a; border-radius: 999px; padding: 4px 8px; margin: 4px 6px 0 0; font-size: 12px; }
-  .pill b { color: #b8c7ff; }
+  .pill b { color: #e6e6e6; }
   .contrast-match { background: #1a1f2a; border: 1px solid #3a4f5a; border-radius: 6px; padding: 12px 16px 12px 40px; margin: 6px 0; font-size: 13px; position: relative; line-height: 1.6; }
   .contrast-match::before { content: '\201C'; position: absolute; left: 8px; top: 4px; font-size: 48px; color: #3a4f5a; opacity: 0.4; font-family: Georgia, serif; line-height: 1; }
   details { margin-top: 10px; }
@@ -205,10 +245,174 @@
   }
 
   .paint-splash { width: 350px; height: 350px; filter: drop-shadow(0 4px 12px rgba(0,0,0,0.3)); }
+
+  /* Light mode styles */
+  body:not(.dark-mode) {
+    --bg: #ffffff;
+    --fg: #222;
+    --muted: #666;
+    --card: #f8f8f8;
+    --accent: #4169e1;
+  }
+
+  body:not(.dark-mode) {
+    background: #ffffff;
+  }
+
+  body:not(.dark-mode) .container {
+    background: #ffffff;
+  }
+
+  body:not(.dark-mode) a {
+    color: #4169e1;
+  }
+
+  body:not(.dark-mode) button {
+    background: #4169e1;
+    color: #fff;
+  }
+
+  body:not(.dark-mode) button.secondary {
+    background: transparent;
+    border: 1px solid #4169e1;
+    color: #4169e1;
+  }
+
+  body:not(.dark-mode) button.secondary:hover {
+    background: #4169e1;
+    color: #fff;
+  }
+
+  body:not(.dark-mode) .nav-dropdown-menu {
+    background: #ffffff;
+    border: 1px solid #ccc;
+  }
+
+  body:not(.dark-mode) .nav-dropdown-item:hover {
+    background: #e8e8e8;
+  }
+
+  body:not(.dark-mode) .leaderboard-bar {
+    background: linear-gradient(90deg, #6fd147 0%, #8fe66a 100%);
+  }
+
+  body:not(.dark-mode) .leaderboard-bar.user-bar {
+    background: linear-gradient(90deg, #ff9d3a 0%, #ffb66a 100%);
+  }
+
+  /* Light mode: Score bar container background */
+  body:not(.dark-mode) .leaderboard-bar-container {
+    background: #e8e8e8;
+  }
+
+  /* Light mode: Selected leaderboard row */
+  body:not(.dark-mode) .leaderboard-row.selected {
+    background: #e8f0ff;
+    border-color: #4169e1;
+  }
+
+  body:not(.dark-mode) .leaderboard-row:hover {
+    background: #f0f0f0;
+  }
+
+  /* Light mode: Pills (slop word hits, etc.) */
+  body:not(.dark-mode) .pill {
+    background: #f0f0f0;
+    border: 1px solid #ccc;
+    color: var(--fg);
+  }
+
+  body:not(.dark-mode) .pill b {
+    color: #222;
+  }
+
+  /* Light mode: Help icon */
+  body:not(.dark-mode) .help-icon {
+    background: #e8e8e8;
+    color: #666;
+  }
+
+  body:not(.dark-mode) .help-icon:hover {
+    background: #d0d0d0;
+    color: #222;
+  }
+
+  /* Light mode: Contrast match blocks */
+  body:not(.dark-mode) .contrast-match {
+    background: #f8f8f8;
+    border: 1px solid #ddd;
+    color: var(--fg);
+  }
+
+  body:not(.dark-mode) .contrast-match::before {
+    color: #ccc;
+  }
+
+  /* Light mode: Help text */
+  body:not(.dark-mode) .help-text {
+    background: #f8f8f8;
+    border: 1px solid #ddd;
+    color: #666;
+  }
+
+  /* Light mode: Modal */
+  body:not(.dark-mode) .modal-content {
+    background: var(--card);
+    border: 1px solid #ddd;
+  }
+
+  /* Light mode: Tooltips */
+  body:not(.dark-mode) .metric-with-tooltip .tooltip-text {
+    background: #333;
+    color: #fff;
+  }
 </style>
 </head>
 <body>
-  <h1>Slop-or-Not</h1>
+  <div class="container mt-4">
+    <div class="form-check form-switch">
+      <input class="form-check-input" type="checkbox" id="darkModeToggle">
+      <label class="form-check-label" for="darkModeToggle" id="toggleLabel">Light</label>
+    </div>
+    <div class="header">
+      <a href="./"><img src="./images/eqbench_logo_sml.png" alt="EQ-bench Logo" class="logo"/></a>
+      <div class="header-text">
+        <h1>Slop-or-Not</h1>
+      </div>
+    </div>
+    <p>Emotional Intelligence Benchmarks for LLMs</p>
+    <p><a href="https://github.com/EQ-bench" target="_blank">Github</a> | <a href="https://arxiv.org/abs/2312.06281" target="_blank">Paper</a> | <span id="email"></span> | <a href="https://twitter.com/sam_paech" target="_blank">Twitter</a> | <a href="about.html">About</a></p>
+
+    <p>
+      <a href='index.html'>💙EQ-Bench3</a>
+      <span class="nav-separator">|</span>
+      <a href='spiral-bench.html'>🌀Spiral-Bench v1.2</a>
+      <span class="nav-separator">|</span>
+      <a href='creative_writing_longform.html'>✍️Longform Writing</a>
+      <span class="nav-separator">|</span>
+      <a href='creative_writing.html'>🎨Creative Writing v3</a>
+      <span class="nav-separator">|</span>
+      <b>🧪Slop-or-Not</b>
+      <span class="nav-separator">|</span>
+      <a href='judgemark-v2.html'>⚖️Judgemark v2.1</a>
+      <span class="nav-separator">|</span>
+      <a href='buzzbench.html'>🎤BuzzBench</a>
+      <span class="nav-separator">|</span>
+      <a href='diplobench.html'>🌍DiploBench</a>
+      <span class="nav-separator">|</span>
+      <span class="nav-dropdown">
+        <button class="nav-dropdown-toggle" id="legacyDropdownToggle">
+          📚Legacy Leaderboards
+        </button>
+        <span class="nav-dropdown-menu" id="legacyDropdownMenu">
+          <a href="spiral-bench_v1.0.html" class="nav-dropdown-item">🌀Spiral-Bench v1.0</a>
+          <a href="creative_writing_v2.html" class="nav-dropdown-item">🎨Creative Writing v2</a>
+          <a href="eqbench-v2.html" class="nav-dropdown-item">💗EQ-Bench v2</a>
+        </span>
+      </span>
+    </p>
+
+  <div class="slop-content">
   <div class="section" style="display: flex; justify-content: space-between; align-items: center;">
     <div>
       <button id="analyzeTextBtn" class="secondary" style="display:none;">
@@ -1760,5 +1964,28 @@ ui.fileList.addEventListener('drop', (e) => {
 
 init();
 </script>
+
+<script src="js/eqbench-utils.js"></script>
+<script>
+// Initialize EQBench utilities
+document.addEventListener('DOMContentLoaded', function() {
+  displayEncodedEmail();
+  applySystemTheme();
+  setupDarkModeToggle();
+
+  // Wire up "Learn more" link to "How it works" modal
+  const learnMoreLink = document.getElementById('learnMoreLink');
+  const howItWorksBtn = document.getElementById('howItWorksBtn');
+  if (learnMoreLink && howItWorksBtn) {
+    learnMoreLink.addEventListener('click', function(e) {
+      e.preventDefault();
+      howItWorksBtn.click();
+    });
+  }
+});
+</script>
+
+</div><!-- .slop-content -->
+</div><!-- .container -->
 </body>
 </html>

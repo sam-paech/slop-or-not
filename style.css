@@ -1,0 +1,807 @@
+.header {
+	display: flex;
+	align-items: flex-end;
+}
+
+.logo {
+	width: 100px;
+	height: auto;
+	margin-right: 10px;
+}
+
+.header-text h1, .header-text p {
+	margin: 0;
+}
+
+table#leaderboard td, table#leaderboard th {
+	padding: 2px 4px;
+}
+
+/* Dark/Light Mode Toggle Styles */
+.mode-toggle {
+	display: flex;
+	align-items: center;
+	position: fixed;
+	top: 10px;
+	right: 10px;
+	z-index: 1000;
+}
+
+/* Label text next to the toggle */
+#toggleLabel {
+	margin-right: 8px;
+}
+
+/* Position the toggle switch in the top-right corner */
+.form-check {
+	position: fixed;
+	top: 10px;
+	right: 10px;
+	z-index: 1000;
+ }
+
+body {
+	background-color: #d0c8ce;
+}
+
+body .container {
+	background-color: #f0ecef;
+}
+
+/* Dark Mode Styles */
+body.dark-mode {
+	background-color: #222;
+	color: #fff;
+}
+
+body.dark-mode .container {
+	background-color: #222;
+}
+
+body.dark-mode a {
+	color: #4dabf7;
+}
+
+/* Style adjustments for DataTables in dark mode */
+body.dark-mode .table {
+	color: #fff;
+	background-color: #333;
+}
+
+body.dark-mode .table th, 
+body.dark-mode .table td {
+	border-color: #666;
+	color: #fff;
+}
+
+body.dark-mode .table-striped > tbody > tr:nth-of-type(odd) {
+	background-color: #484848; /* Slightly lighter than the table background for contrast */
+}
+
+body.dark-mode .table-striped > tbody > tr:nth-of-type(even) {
+	background-color: #3A3A3A; /* Same as table background */
+}
+
+/* DataTables container */
+.dataTables_wrapper {
+	display: block;
+}
+
+/* Flex container for the length and filter elements */
+.dataTables_wrapper .dataTables_length,
+.dataTables_wrapper .dataTables_filter {
+    flex: 1;
+}
+
+/* Adjust the length of the search input for desktop screens */
+.dataTables_filter input {
+	width: 100%;
+	max-width: 140px;
+}
+
+/* On larger screens, ensure they are spaced out */
+@media (min-width: 992px) {
+    .dataTables_wrapper .d-flex {
+        justify-content: space-between;
+    }
+}
+
+/* On smaller screens, adjust the layout */
+@media (max-width: 991px) {
+    .dataTables_wrapper .d-flex {
+        flex-direction: row;
+    }
+
+    .dataTables_wrapper .dataTables_length,
+    .dataTables_wrapper .dataTables_filter {
+        flex: 1 0 50%;
+    }
+
+    .dataTables_wrapper .dataTables_filter {
+        padding-left: 0.5rem;
+    }
+}
+
+/* For the smallest screens */
+@media (max-width: 575px) {
+    .dataTables_wrapper .dataTables_length,
+    .dataTables_wrapper .dataTables_filter {
+        flex: 1 0 100%;
+		  text-align: right;
+    }
+
+	table#leaderboard td {
+		white-space: normal;
+		word-wrap: break-word;
+	}
+	
+	table#leaderboard td:first-child {
+		max-width: 100px;
+		min-width: 100px;
+
+	}
+
+	#judgemark-leaderboard .collapsed-columns {
+			display: none;
+	}
+
+	#judgemark-leaderboard td,
+	#judgemark-leaderboard th {
+			white-space: normal;
+			word-wrap: break-word;
+	}
+
+	#judgemark-leaderboard_filter {
+		margin-left: auto;
+  }
+
+  #toggleMiddleStats {
+		margin-right: 10px;
+  }
+	
+}
+
+@media (max-width: 960px) {
+	#toggleMiddleStatsJudgemarkv2 {
+		margin-right: 10px;
+	}
+}
+
+
+th.calibrated-score-col,
+    td.calibrated-score-col {
+      min-width: 140px;
+      /* Let it grow or shrink as needed */
+      width: auto;
+      white-space: nowrap;
+    }
+
+
+	
+
+.collapsed-columns {
+	display: none; /* Will be toggled between hidden/unwrapped on mobile */
+}
+
+/* Make table responsive */
+@media (max-width: 767px) {
+	.table-responsive {
+		 display: block;
+		 width: 100%;		 
+		 overflow-x: auto;
+		 -webkit-overflow-scrolling: touch;
+		 
+	}
+	.table-responsive > .table {
+		 margin-bottom: 0;
+	}
+
+	.container {
+		width: 100%;
+		max-width: none;
+  }
+
+  .dataTables_wrapper .d-flex .dataTables_length,
+    .dataTables_wrapper .d-flex .dataTables_filter {
+        text-align: right;
+        justify-content: flex-end;
+	}
+
+
+}
+
+
+#leaderboard th {
+	white-space: nowrap;
+	min-width: 30px;
+}
+
+.score-bar-container {
+	position: relative;
+	height: 20px;
+	background: transparent; 
+	border-radius: 5px;
+	overflow: hidden;
+	z-index: 1;
+}
+
+.score-bar {
+	display: none;
+	position: absolute;
+	height: 100%;
+	left: 0;
+	top: 0;
+	background: linear-gradient(to right, #e9d4f8, #b7a6c3);
+	border-radius: 5px;
+	transition: width 0.5s ease;
+	z-index: 1;
+}
+
+.score-text {
+	display: block;
+	position: absolute;
+	width: 100%;
+	text-align: center;
+	line-height: 20px;
+	z-index: 99;
+	
+}
+ 
+ /* Dark Mode additional styles for the score bar */
+ body.dark-mode .score-bar-container {
+	background: #555;
+ }
+ 
+ body.dark-mode .score-bar {
+	background: linear-gradient(to right, #7d2eb5, #471a67);
+ }
+ 
+ body.dark-mode .score-text {
+	color: #fff;
+ }
+
+
+ .expando-content {
+	display: none;
+}
+
+/* Legend styles */
+.legend-container {
+	display: flex;
+	align-items: center;
+	margin-bottom: 1rem;
+}
+
+.legend-color-box {
+	width: 20px;
+	height: 20px;
+	margin-right: 0.5rem;
+}
+
+/* Light/Dark mode specific colors for legend */
+.legend-light-mode {
+	background-color: #d1e7dd; /* same as .new-model */
+}
+
+.legend-dark-mode {
+	background-color: #276e57b0; /* same as body.dark-mode .new-model */
+}
+
+.legend-text {
+	font-size: 0.9rem;
+}
+
+
+/* Creative Writing Leaderboard Styles */
+.creative-writing-score-bar {
+	display: none; /* Initially hidden, shown via JavaScript */
+	position: absolute;
+	height: 100%;
+	left: 0;
+	top: 0;
+	border-radius: 2px;
+	transition: width 0.5s ease;
+	z-index: 1;
+	max-width: 100%;
+	/* Background will be set dynamically */
+}
+
+.section {
+	padding: 20px;
+	margin-bottom: 20px;
+	border-radius: 5px;
+	background-color: #f0f0f0;
+ }
+ 
+ body.light-mode .section {
+	background-color: #f0f0f0;
+ }
+ 
+ body.dark-mode .section {
+	background-color: #333;
+ }
+
+
+ .judgemark-score-bar {
+	display: none;
+	position: absolute;
+	height: 100%;
+	left: 0;
+	top: 0;
+	background: linear-gradient(to right, #e5a58c, #e8bfaa);
+	border-radius: 5px;
+	transition: width 0.5s ease;
+	z-index: 1;
+}
+
+body.dark-mode .judgemark-score-bar {
+	background: linear-gradient(to right, #eaac97, #d3581a);
+}
+
+.middle-stats {
+	transition: display 0.3s ease;
+}
+
+table#judgemark-leaderboard td, table#judgemark-leaderboard th {
+	padding: 2px 4px;
+}
+
+.metric-description {
+	display: flex;
+	justify-content: left;
+	margin-bottom: 5px; /* Adds space between lines */
+}
+.metric-name {
+	font-style: italic;
+	min-width: 120px; /* Adjust this as needed to align the descriptions */
+}
+.metric-explanation {
+	text-align: left;
+}
+
+.error-bar {
+	position: absolute;
+	top: 50%;
+	height: 1px;
+	background-color: rgba(84, 84, 84, 0.6);
+	transform: translateY(-50%);
+	z-index: 2;
+}
+
+.error-bar::before,
+.error-bar::after {
+	content: "";
+	position: absolute;
+	width: 1px;
+	height: 6px;
+	background-color: rgba(84, 84, 84, 0.6);
+	top: 50%;
+	transform: translateY(-50%);
+}
+
+.error-bar::before {
+	left: 0;
+}
+
+.error-bar::after {
+	right: 0;
+}
+
+/* Add dark mode styles for the error bar */
+body.dark-mode .error-bar,
+body.dark-mode .error-bar::before,
+body.dark-mode .error-bar::after {
+	background-color: rgba(255, 255, 255, 0.6);
+}
+
+.vocab-control-container {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.vocab-control-label {
+    margin-bottom: 5px; /* Adjust this value to control space between text and slider */
+}
+
+.vocab-control-slider {
+    width: 100%;
+}
+
+.custom-width-slider {
+	width: 150px; /* Adjust this value to your desired width */
+}
+
+
+
+
+.d-flex {
+    display: flex;
+    align-items: flex-start; /* Align to the top */
+}
+
+.me-3 {
+    margin-right: 1rem; /* Space between the controls */
+}
+
+.custom-width-slider {
+    width: 150px;
+    height: 1.5rem; /* Set a fixed height for both sliders to align them perfectly */
+    margin: 0; /* Remove any margin between slider and label */
+    padding: 0; /* Ensure no padding throws off the alignment */
+}
+
+.form-range {
+    appearance: none; /* Remove default styles, we can set the same for both */
+    -webkit-appearance: none; /* Ensure consistency in Webkit browsers */
+    height: 1.5rem; /* Explicit height to ensure alignment */
+    margin: 0; /* Remove default margins */
+}
+
+/* BuzzBench score container background */
+#leaderboard.buzzbench .score-bar-container {
+    background-color: #5b5b5b !important;
+    border-radius: 5px;
+}
+
+/* BuzzBench score bar */
+.buzzbench-score-bar {
+    display: none;
+    position: absolute;
+    height: 100%;
+    left: 0;
+    top: 0;
+    background: linear-gradient(to right, 
+        #000000, 
+        #ff1493, 
+        #ff1493, 
+        #000000
+    );
+    border-radius: 5px;
+    transition: width 0.5s ease;
+    z-index: 1;
+}
+
+/* BuzzBench score text */
+#leaderboard.buzzbench .score-bar-container .score-text {
+    color: white !important;
+    z-index: 2;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
+}
+
+/* BuzzBench error bars */
+#leaderboard.buzzbench .error-bar, 
+#leaderboard.buzzbench .error-bar::before,
+#leaderboard.buzzbench .error-bar::after {
+    background-color: rgba(255, 255, 255, 0.6) !important;
+}
+
+/* Light mode (default) */
+.code-block {
+	background: #f8f9fa;
+	border: 1px solid #e9ecef;
+	border-radius: 4px;
+	padding: 1rem;
+	margin: 1rem 0;
+	white-space: pre;
+	font-family: monospace;
+	font-size: 14px;
+	line-height: 1.5;
+	overflow-x: auto;
+	color: #212529;
+  }
+  
+  /* Dark mode */
+  body.dark-mode .code-block {
+	background: #1e1e1e;
+	border-color: #2d2d2d;
+	color: #e9ecef;
+  }
+
+  .gpt-slop-control-container {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.gpt-slop-control-label {
+    margin-bottom: 5px;
+}
+
+.gpt-slop-control-slider {
+    width: 100%;
+}
+
+/* Dark mode compatibility styles */
+.dark-mode-compatible {
+    background-color: rgba(23, 162, 184, 0.15);
+    color: inherit;
+    border: 1px solid rgba(23, 162, 184, 0.3);
+}
+
+.dark-mode .dark-mode-compatible {
+	background-color: rgba(23, 162, 184, 0.1);
+	border: 1px solid rgba(23, 162, 184, 0.2);
+}
+
+.dark-mode #vocab-explanation .card {
+	background-color: #2a2a2a;
+	border-color: #444;
+}
+
+/* Remove default alert icon padding if it exists */
+.dark-mode-compatible p {
+	margin-bottom: 0;
+}
+
+
+/* EQ-Bench 3 score bar styles */
+.eqbench3-score-bar {
+    display: none;
+    position: absolute;
+    height: 100%;
+    left: 0;
+    top: 0;
+    border-radius: 5px;
+    transition: width 0.5s ease;
+    z-index: 1;
+}
+
+/* Table styling for EQ-Bench 3 */
+table.eqbench3 th, table.eqbench3 td {
+    padding: 2px 4px;
+}
+
+table.eqbench3 .score-bar-container {
+    height: 20px;
+    position: relative;
+    background: transparent;
+    border-radius: 5px;
+    overflow: hidden;
+}
+
+/* Adjust the layout of the table columns */
+table.eqbench3 th:nth-child(1) {
+    width: 45%;
+}
+
+table.eqbench3 th:nth-child(2) {
+    width: 15%;
+}
+
+table.eqbench3 th:nth-child(3) {
+    width: 40%;
+}
+
+
+
+
+
+
+/* Slightly improved dark mode background contrast */
+body.dark-mode {
+    background-color: #201f1f; /* Just a bit darker than original */
+    color: #fff;
+}
+
+body.dark-mode .container {
+    background-color: #201f1f; /* Mild contrast from background */
+}
+
+
+/* Result column */
+.result-col a {
+	color: inherit;
+	text-decoration: none;
+  }
+  
+  .result-col a:hover {
+	text-decoration: underline;
+  }
+  
+  /* Make sure win and loss bars are visible in dark mode */
+  body.dark-mode .win-score-bar {
+	background-color: #2E7D32;
+  }
+  
+  body.dark-mode .loss-score-bar {
+	background-color: #C62828;
+  }
+
+
+
+
+  /* Add this to your style.css */
+.collapsed-columns {
+	display: none; /* Hide the container by default */
+  }
+  
+  /* Ensure table width is handled correctly */
+  #leaderboard {
+	  width: 100% !important; /* Force table width for DataTables */
+  }
+  
+  /* Adjust padding for mobile toggle button if needed */
+  #toggleMobilePlaceholder {
+	  /* Add any specific styling if the button looks out of place */
+	  /* Example: margin-bottom: 0.5rem; */
+  }
+  
+  /* Ensure score text remains centered and visible */
+  .score-text {
+	display: block;
+	position: absolute;
+	width: 100%;
+	text-align: center;
+	line-height: 20px; /* Match score-bar-container height */
+	z-index: 99;
+	color: #000; /* Default text color */
+	/* Prevent text selection if desired */
+	-webkit-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+  }
+  
+  body.dark-mode .score-text {
+   color: #fff; /* Text color for dark mode */
+  }
+  
+  /* Ensure score bar container allows text overlay */
+  .score-bar-container {
+	position: relative;
+	height: 20px;
+	background: transparent;
+	border-radius: 5px;
+	overflow: hidden;
+	z-index: 1; /* Ensure container is behind text */
+  }
+  
+  /* Ensure score bar itself is behind text */
+  .creative-writing-score-bar {
+	/* display: none; */ /* Controlled by JS */
+	position: absolute;
+	height: 100%;
+	left: 0;
+	top: 0;
+	border-radius: 2px;
+	transition: width 0.5s ease;
+	z-index: 1; /* Behind score-text (z-index 99) */
+	max-width: 100%;
+	/* Background set by JS */
+  }
+  
+  /* Dark mode score bar container background */
+  body.dark-mode .score-bar-container {
+   background: #555;
+  }
+
+
+  @media (max-width: 768px) {
+	/* Ensure the table layout is “fixed” so columns don't jump around */
+
+  
+	/* Remove any extra spacing from the td itself, so the .cell-content controls it */
+	#leaderboard tbody td {
+		padding: 0;
+		white-space: normal; /* allow text wrapping */
+		vertical-align: middle;
+	  }
+	
+	  /* The nested .cell-content block can enforce min-height */
+	  #leaderboard tbody td .cell-content {
+		display: flex;
+		align-items: center;
+		min-height: 3.5em;
+		line-height: 1.3em;
+		width: 100%;
+		padding: 0.4em;
+		box-sizing: border-box;
+	  }
+
+	  #leaderboard tbody td .cell-content .score-bar-container {
+		flex: 1;              /* Occupy leftover space inside the row's flex container */
+		display: flex;        /* (optional) If you also want to align items inside it */
+		align-items: center;  /* (optional) to vertically center the bar & text */
+		gap: 0.5em;           /* optional spacing between bar and text */
+	  }
+
+
+  }
+
+  @media (min-width: 768px) {
+	#leaderboard tbody td:first-child {
+	  white-space: nowrap;
+	  overflow: hidden;
+	  text-overflow: ellipsis;
+	  
+	  
+	  vertical-align: middle; /* optional alignment tweak */
+	}
+  }
+
+
+  /* Make each navigation link non-breaking */
+.container p a,
+.container p b {
+  display: inline-block;
+  white-space: nowrap;
+}
+
+/* Style the separator spans for proper spacing */
+.container p .nav-separator {
+  margin: 0 0.5rem;
+}
+
+
+
+/* Navigation dropdown styling */
+.nav-dropdown {
+	position: relative;
+	display: inline-block;
+}
+
+.nav-dropdown-toggle {
+	background: none;
+	border: none;
+	padding: 0;
+	font: inherit;
+	color: #007bff;
+	cursor: pointer;
+	text-decoration: none;
+}
+
+.nav-dropdown-toggle:hover {
+	text-decoration: underline;
+}
+
+.nav-dropdown-toggle::after {
+	content: ' ▾';
+	font-size: 0.8em;
+}
+
+body.dark-mode .nav-dropdown-toggle {
+	color: #4dabf7;
+}
+
+.nav-dropdown-menu {
+	display: none;
+	position: absolute;
+	top: 100%;
+	left: 0;
+	margin-top: 8px;
+	padding: 8px 0;
+	background: var(--bg-color, #ffffff);
+	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+	border-radius: 4px;
+	min-width: 200px;
+	z-index: 1000;
+}
+
+.nav-dropdown-menu.show {
+	display: block;
+}
+
+.nav-dropdown-item {
+	display: block;
+	padding: 8px 16px;
+	color: inherit;
+	text-decoration: none;
+	white-space: nowrap;
+}
+
+.nav-dropdown-item:hover {
+	background: rgba(0, 0, 0, 0.05);
+	color: inherit;
+	text-decoration: none;
+}
+
+/* Dark mode support */
+body.dark-mode .nav-dropdown-menu {
+	background: var(--bg-color, #1a1a1a);
+	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+}
+
+body.dark-mode .nav-dropdown-item:hover {
+	background: rgba(255, 255, 255, 0.1);
+}
