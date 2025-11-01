@@ -23,8 +23,8 @@
   .section { margin-top: 16px; }
   .pill { display: inline-block; background: #10141c; border: 1px solid #2a2f3a; border-radius: 999px; padding: 4px 8px; margin: 4px 6px 0 0; font-size: 12px; }
   .pill b { color: #b8c7ff; }
-  .contrast-match { background: #1a1f2a; border: 1px solid #3a4f5a; border-radius: 6px; padding: 8px 10px; margin: 6px 0; font-size: 12px; }
-  .contrast-match .pattern { color: #8a9aaa; font-size: 10px; margin-bottom: 4px; }
+  .contrast-match { background: #1a1f2a; border: 1px solid #3a4f5a; border-radius: 6px; padding: 12px 16px 12px 40px; margin: 6px 0; font-size: 13px; position: relative; line-height: 1.6; }
+  .contrast-match::before { content: '\201C'; position: absolute; left: 8px; top: 4px; font-size: 48px; color: #3a4f5a; opacity: 0.4; font-family: Georgia, serif; line-height: 1; }
   details { margin-top: 10px; }
   summary { cursor: pointer; color: #c7d5ff; }
   code { background: #10141c; padding: 2px 6px; border-radius: 6px; }
@@ -63,8 +63,20 @@
   .modal-metric-label { position: relative; z-index: 1; text-align: left; }
   .modal-metric-value { position: relative; z-index: 1; text-align: right; font-weight: 600; font-family: var(--mono); }
 
+  /* How it works modal styles */
+  #howItWorksBody { line-height: 1.6; }
+  #howItWorksBody h3 { color: var(--accent); margin-top: 20px; margin-bottom: 10px; }
+  #howItWorksBody p { margin-bottom: 12px; }
+  #howItWorksBody ul { margin-top: 8px; margin-bottom: 12px; padding-left: 24px; }
+  #howItWorksBody a { color: var(--accent); text-decoration: none; }
+  #howItWorksBody a:hover { text-decoration: underline; }
+
   button.secondary { background: transparent; border: 1px solid var(--accent); color: var(--accent); margin-left: 10px; }
   button.secondary:hover { background: var(--accent); color: var(--bg); }
+
+  /* Button icon styles */
+  .btn-icon { display: inline-block; width: 16px; height: 16px; margin-right: 6px; vertical-align: middle; }
+  #analyzeTextBtn .btn-icon { filter: drop-shadow(0 1px 2px rgba(0,0,0,0.2)); }
 
   /* Mobile styles */
   @media (max-width: 768px) {
@@ -106,6 +118,14 @@
   .metric-with-tooltip { position: relative; cursor: help; }
   .metric-with-tooltip .tooltip-text { visibility: hidden; position: absolute; z-index: 1000; background: #2a2f3a; color: var(--fg); padding: 8px 12px; border-radius: 6px; font-size: 12px; width: 240px; left: 0; top: 100%; margin-top: 4px; opacity: 0; transition: opacity 0.2s; line-height: 1.4; box-shadow: 0 4px 6px rgba(0,0,0,0.3); pointer-events: none; }
   .metric-with-tooltip:hover .tooltip-text { visibility: visible; opacity: 1; }
+
+  /* Help icon styles */
+  .help-icon { display: inline-block; width: 16px; height: 16px; line-height: 16px; text-align: center; background: #2a2f3a; color: var(--muted); border-radius: 50%; font-size: 11px; font-weight: bold; margin-left: 6px; cursor: pointer; position: relative; }
+  .help-icon:hover { background: #3a4f5a; color: var(--fg); }
+  .help-text { display: none; background: #1a1f2a; border: 1px solid #2a2f3a; border-radius: 6px; padding: 10px 14px; font-size: 12px; line-height: 1.5; margin-top: 8px; margin-bottom: 8px; color: var(--muted); }
+  .help-text.visible { display: block; }
+  .help-text a { color: var(--accent); text-decoration: none; }
+  .help-text a:hover { text-decoration: underline; }
 
   /* Slop/Not Slop verdict animation */
   #verdictOverlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; display: none; align-items: center; justify-content: center; z-index: 9999; pointer-events: none; }
@@ -179,11 +199,35 @@
 </head>
 <body>
   <h1>Slop-or-Not</h1>
-  <div class="section">
-    <button id="analyzeTextBtn" class="secondary" style="display:none;">Analyse Text</button>
-    <button id="viewLeaderboardBtn" class="secondary" style="display:none;">View Leaderboard</button>
-    <button id="analyzeBtn" disabled style="display:none;">Analyze</button>
-    <span id="status" class="muted" style="margin-left:10px;">loading resources…</span>
+  <div class="section" style="display: flex; justify-content: space-between; align-items: center;">
+    <div>
+      <button id="analyzeTextBtn" class="secondary" style="display:none;">
+        <svg class="btn-icon" viewBox="0 0 300 300" xmlns="http://www.w3.org/2000/svg">
+          <g>
+            <ellipse cx="150" cy="150" rx="90" ry="85" fill="#39ff14" opacity="0.95" transform="rotate(-12 150 150)"/>
+            <ellipse cx="140" cy="160" rx="75" ry="70" fill="#39ff14" opacity="0.9" transform="rotate(25 140 160)"/>
+            <ellipse cx="95" cy="120" rx="45" ry="35" fill="#39ff14" opacity="0.85" transform="rotate(-30 95 120)"/>
+            <ellipse cx="205" cy="140" rx="50" ry="38" fill="#39ff14" opacity="0.88" transform="rotate(45 205 140)"/>
+            <ellipse cx="130" cy="215" rx="40" ry="32" fill="#39ff14" opacity="0.9" transform="rotate(15 130 215)"/>
+            <ellipse cx="170" cy="90" rx="35" ry="28" fill="#39ff14" opacity="0.87" transform="rotate(-50 170 90)"/>
+            <ellipse cx="70" cy="105" rx="25" ry="30" fill="#39ff14" opacity="0.8" transform="rotate(10 70 105)"/>
+            <ellipse cx="225" cy="175" rx="28" ry="35" fill="#39ff14" opacity="0.82" transform="rotate(-20 225 175)"/>
+            <ellipse cx="150" cy="235" rx="22" ry="28" fill="#39ff14" opacity="0.85" transform="rotate(5 150 235)"/>
+            <circle cx="50" cy="85" r="18" fill="#39ff14" opacity="0.75"/>
+            <circle cx="240" cy="120" r="15" fill="#39ff14" opacity="0.7"/>
+            <circle cx="110" cy="250" r="12" fill="#39ff14" opacity="0.78"/>
+            <circle cx="195" cy="70" r="14" fill="#39ff14" opacity="0.72"/>
+            <circle cx="260" cy="160" r="10" fill="#39ff14" opacity="0.68"/>
+            <circle cx="40" cy="140" r="11" fill="#39ff14" opacity="0.7"/>
+          </g>
+        </svg>
+        Analyse your text
+      </button>
+      <button id="viewLeaderboardBtn" class="secondary" style="display:none;">View Leaderboard</button>
+      <button id="analyzeBtn" disabled style="display:none;">Analyze</button>
+      <span id="status" class="muted" style="margin-left:10px;">loading resources…</span>
+    </div>
+    <button id="howItWorksBtn" class="secondary">How does this work?</button>
   </div>
   <div id="errors" class="section mono" style="white-space:pre-wrap;color:#ffb4b4;"></div>
   <div class="row">
@@ -207,6 +251,55 @@
         <button class="modal-close" id="closeModal">&times;</button>
       </div>
       <div id="modalBody"></div>
+    </div>
+  </div>
+
+  <!-- How it works modal -->
+  <div id="howItWorksModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 style="margin:0;">How does this work?</h2>
+        <button class="modal-close" id="closeHowItWorksModal">&times;</button>
+      </div>
+      <div id="howItWorksBody">
+        <h3>What is Slop-or-Not?</h3>
+        <p>Slop-or-Not is a leaderboard and analysis tool for computing how much a given text looks/smells like AI "slop". It looks specifically at words and patterns that occur more frequently in AI text than in human text.</p>
+
+        <h3>Not an AI Detector!</h3>
+        <p>This tool works differently than most AI detectors: It looks for glaringly over-used patterns, rather than trying to classify the text as AI or human. It will detect words and phrases that smell of AI, but it won't reliably help you avoid AI detection. The best way to avoid AI detectors is to write in your own words.</p>
+
+        <h3>Tips for the Analysis Tool</h3>
+        <ul style="line-height: 1.8;">
+          <li>Analysis works best on several pieces of writing on different topics. The more the better! It will still work on a single story or essay, but the results will be skewed by the topic.</li>
+          <li>The analysis is optimised for creative writing and essays. It may work for other domains, but will likely under-report slop.</li>
+        </ul>
+
+        <h3>Slop Score Calculation</h3>
+        <p>The Slop Score is a weighted composite metric designed to detect AI-generated text patterns:</p>
+        <ul style="line-height: 1.8;">
+          <li><strong>45%</strong> - Slop Words: Frequency of individual words that appear unnaturally often in LLM outputs</li>
+          <li><strong>40%</strong> - Not-x-but-y Patterns: Frequency of contrast patterns like "not just X, but Y" which are overused by AI</li>
+          <li><strong>15%</strong> - Slop Trigrams: Frequency of 3-word phrases that appear unnaturally often in LLM outputs</li>
+        </ul>
+
+        <h3>Slop Lists</h3>
+        <p>The slop word and trigram lists are produced using the <a href="https://github.com/sam-paech/slop-forensics" target="_blank" style="color: var(--accent);">slop-forensics toolkit</a>. This tool identifies words and n-grams that are statistically over-represented in LLM outputs compared to human writing.</p>
+        <p>The lists were computed by analyzing outputs from 10 different language models on a selection of essay and creative writing prompts, then comparing them against human-authored text.</p>
+        <p>View the lists: <a href="https://github.com/sam-paech/slop-or-not/blob/main/data/slop_list.json" target="_blank" style="color: var(--accent);">Slop Words</a> | <a href="https://github.com/sam-paech/slop-or-not/blob/main/data/slop_list_trigrams.json" target="_blank" style="color: var(--accent);">Slop Trigrams</a></p>
+
+        <h3>Over-represented Words & Trigrams</h3>
+        <p>These sections show words and phrases that occur more frequently in the analyzed text than in typical human writing, based on:</p>
+        <ul style="line-height: 1.8;">
+          <li><strong>Words</strong>: Compared against the <a href="https://github.com/rspeer/wordfreq" target="_blank" style="color: var(--accent);">wordfreq</a> baseline (a large corpus of human language)</li>
+          <li><strong>Trigrams</strong>: Compared against a human baseline corpus of essays and creative writing</li>
+        </ul>
+
+        <h3>Additional Metrics</h3>
+        <p>The tool also provides various writing style metrics including lexical diversity (MATTR-500), vocabulary level (Flesch-Kincaid), sentence and paragraph length, and dialogue frequency to give a comprehensive view of the text's characteristics.</p>
+
+        <h3>Leaderboard</h3>
+        <p>The leaderboard shows how different language models score on the Slop metric, based on their outputs from a standardized set of prompts. Lower scores indicate more human-like writing patterns.</p>
+      </div>
     </div>
   </div>
 
@@ -248,6 +341,9 @@ const ui = {
   closeModal: document.getElementById('closeModal'),
   verdictOverlay: document.getElementById('verdictOverlay'),
   verdictContent: document.getElementById('verdictContent'),
+  howItWorksBtn: document.getElementById('howItWorksBtn'),
+  howItWorksModal: document.getElementById('howItWorksModal'),
+  closeHowItWorksModal: document.getElementById('closeHowItWorksModal'),
 };
 
 let ready = false;
@@ -565,20 +661,14 @@ function renderContrastMatches(targetEl, matches, showLimit = 10) {
   const hiddenMatches = matches.slice(showLimit);
 
   let html = visibleMatches.map(m =>
-    `<div class="contrast-match">
-      <div class="pattern">${m.pattern_name}</div>
-      <div>${m.sentence}</div>
-    </div>`
+    `<div class="contrast-match">${m.sentence}</div>`
   ).join("");
 
   if (hiddenMatches.length > 0) {
     const toggleId = 'toggle_' + Math.random().toString(36).substr(2, 9);
     html += `<div id="${toggleId}_hidden" style="display:none;">`;
     html += hiddenMatches.map(m =>
-      `<div class="contrast-match">
-        <div class="pattern">${m.pattern_name}</div>
-        <div>${m.sentence}</div>
-      </div>`
+      `<div class="contrast-match">${m.sentence}</div>`
     ).join("");
     html += `</div>`;
     html += `<button class="show-more" id="${toggleId}_btn">Show ${hiddenMatches.length} more</button>`;
@@ -649,7 +739,8 @@ function computeSlopScore(slopWordScore, slopTrigramScore, contrastScore) {
   const normTrigrams = normalizeValue(slopTrigramScore, normalizationRanges.slop_trigrams);
   const normContrast = normalizeValue(contrastScore, normalizationRanges.contrast);
 
-  return ((normWords + normTrigrams + normContrast) / 3) * 100;
+  // Weighted formula: 45% slop words + 40% not-x-but-y + 15% slop trigrams
+  return (normWords * 0.45 + normContrast * 0.40 + normTrigrams * 0.15) * 100;
 }
 
 function renderLeaderboard(includeUserResult = false) {
@@ -765,7 +856,7 @@ function updateRightPanel(entry) {
         <div class="modal-metric-bg slop" style="width: ${entry.slopScore}%"></div>
         <div class="modal-metric-label">Slop Score</div>
         <div class="modal-metric-value">${entry.slopScore.toFixed(2)}</div>
-        <span class="tooltip-text">Combined metric: 1/3 slop words + 1/3 slop trigrams + 1/3 contrast patterns, normalized across all models</span>
+        <span class="tooltip-text">Combined metric: 45% slop words + 40% not-x-but-y patterns + 15% slop trigrams, normalized across all models</span>
       </div>
       <div class="modal-metric metric-with-tooltip">
         <div class="modal-metric-bg slop" style="width: ${normSlopWords * 100}%"></div>
@@ -901,11 +992,26 @@ function updateRightPanel(entry) {
     }
 
     // Helper function to render items with show more
-    const renderItemsWithShowMore = (items, title, formatter) => {
+    const renderItemsWithShowMore = (items, title, formatter, helpText = null) => {
       if (!items || items.length === 0) return '';
 
       const toggleId = 'panel_' + Math.random().toString(36).substr(2, 9);
-      let itemsHtml = `<h4 style="margin-top: 16px;">${title}</h4><div style="margin-top: 8px;">`;
+      const helpId = 'help_' + Math.random().toString(36).substr(2, 9);
+
+      let itemsHtml = `<h4 style="margin-top: 16px;">`;
+      itemsHtml += title;
+
+      if (helpText) {
+        itemsHtml += `<span class="help-icon" id="${helpId}_btn">?</span>`;
+      }
+
+      itemsHtml += `</h4>`;
+
+      if (helpText) {
+        itemsHtml += `<div class="help-text" id="${helpId}_text">${helpText}</div>`;
+      }
+
+      itemsHtml += `<div style="margin-top: 8px;">`;
 
       const visibleItems = items.slice(0, 10);
       const hiddenItems = items.slice(10);
@@ -927,53 +1033,51 @@ function updateRightPanel(entry) {
       return itemsHtml;
     };
 
-    if (data.top_over_represented) {
+    // Skip over-represented and slop hits for human-baseline
+    const isHumanBaseline = entry.model === 'human-baseline';
+
+    // Add slop word hits (only for user-submitted text, not for human-baseline)
+    if (data.slop_word_hits && data.slop_word_hits.length > 0 && !isHumanBaseline) {
+      html += renderItemsWithShowMore(
+        data.slop_word_hits,
+        'Slop Word Hits',
+        hit => `<span class="pill"><b>${hit[0]}</b> <span class="muted">(${hit[1]})</span></span>`,
+        'Matches to a precompiled slop list produced with the <a href="https://github.com/sam-paech/slop-forensics" target="_blank" style="color: var(--accent);">slop-forensics toolkit</a>. The list identifies words that are over-represented in LLM outputs compared to human writing, computed from 10 models\' outputs on essay & creative writing prompts. <a href="https://github.com/sam-paech/slop-or-not/blob/main/data/slop_list.json" target="_blank" style="color: var(--accent);">View slop list</a>'
+      );
+    }
+
+    // Add slop trigram hits (only for user-submitted text, not for human-baseline)
+    if (data.slop_trigram_hits && data.slop_trigram_hits.length > 0 && !isHumanBaseline) {
+      html += renderItemsWithShowMore(
+        data.slop_trigram_hits,
+        'Slop Trigram Hits',
+        hit => `<span class="pill"><b>${hit[0]}</b> <span class="muted">(${hit[1]})</span></span>`,
+        'Matches to a precompiled slop trigram list produced with the <a href="https://github.com/sam-paech/slop-forensics" target="_blank" style="color: var(--accent);">slop-forensics toolkit</a>. The list identifies 3-word phrases that are over-represented in LLM outputs compared to human writing, computed from 10 models\' outputs on essay & creative writing prompts. <a href="https://github.com/sam-paech/slop-or-not/blob/main/data/slop_list_trigrams.json" target="_blank" style="color: var(--accent);">View trigram list</a>'
+      );
+    }
+
+    if (data.top_over_represented && !isHumanBaseline) {
       html += renderItemsWithShowMore(
         data.top_over_represented.words,
         'Top Over-represented Words',
-        w => `<span class="pill"><b>${w.word}</b> <span class="muted">${w.ratio.toFixed(2)}×</span></span>`
-      );
-
-      html += renderItemsWithShowMore(
-        data.top_over_represented.bigrams,
-        'Top Over-represented Bigrams',
-        b => `<span class="pill"><b>${b.phrase}</b> <span class="muted">${b.ratio.toFixed(2)}×</span></span>`
+        w => `<span class="pill"><b>${w.word}</b> <span class="muted">${w.ratio.toFixed(2)}×</span></span>`,
+        'Words that occur more frequently in this text than in typical human-authored text (based on wordfreq baseline).'
       );
 
       html += renderItemsWithShowMore(
         data.top_over_represented.trigrams,
         'Top Over-represented Trigrams',
-        t => `<span class="pill"><b>${t.phrase}</b> <span class="muted">${t.ratio.toFixed(2)}×</span></span>`
+        t => `<span class="pill"><b>${t.phrase}</b> <span class="muted">${t.ratio.toFixed(2)}×</span></span>`,
+        '3-word phrases that occur more frequently in this text than in typical human-authored text (based on human baseline corpus).'
       );
     }
 
-    // Add slop word hits (only for user-submitted text)
-    if (data.slop_word_hits && data.slop_word_hits.length > 0) {
-      html += renderItemsWithShowMore(
-        data.slop_word_hits,
-        'Slop Word Hits',
-        hit => `<span class="pill"><b>${hit[0]}</b> <span class="muted">(${hit[1]})</span></span>`
-      );
-    }
-
-    // Add slop trigram hits (only for user-submitted text)
-    if (data.slop_trigram_hits && data.slop_trigram_hits.length > 0) {
-      html += renderItemsWithShowMore(
-        data.slop_trigram_hits,
-        'Slop Trigram Hits',
-        hit => `<span class="pill"><b>${hit[0]}</b> <span class="muted">(${hit[1]})</span></span>`
-      );
-    }
-
-    // Add contrast matches
+    // Add contrast matches (always show, even for human-baseline)
     if (data.contrast_matches && data.contrast_matches.length > 0) {
       html += renderItemsWithShowMore(
         data.contrast_matches,
         'Not-x-but-y Patterns',
-        m => `<div class="contrast-match">
-          <div class="pattern">${m.pattern_name}</div>
-          <div>${m.sentence}</div>
-        </div>`
+        m => `<div class="contrast-match">${m.sentence}</div>`
       );
     }
   }
@@ -993,6 +1097,17 @@ function updateRightPanel(entry) {
       btn.textContent = expanded ? 'Show less' : `Show ${count} more`;
     });
   });
+
+  // Add click handlers for help icons
+  ui.panelContent.querySelectorAll('.help-icon').forEach(btn => {
+    const helpId = btn.id.replace('_btn', '');
+    const helpText = document.getElementById(`${helpId}_text`);
+    if (helpText) {
+      btn.addEventListener('click', () => {
+        helpText.classList.toggle('visible');
+      });
+    }
+  });
 }
 
 function showDetailModal(entry) {
@@ -1011,7 +1126,7 @@ function showDetailModal(entry) {
         <div class="modal-metric-bg slop" style="width: ${entry.slopScore}%"></div>
         <div class="modal-metric-label">Slop Score</div>
         <div class="modal-metric-value">${entry.slopScore.toFixed(2)}</div>
-        <span class="tooltip-text">Combined metric: 1/3 slop words + 1/3 slop trigrams + 1/3 contrast patterns, normalized across all models</span>
+        <span class="tooltip-text">Combined metric: 45% slop words + 40% not-x-but-y patterns + 15% slop trigrams, normalized across all models</span>
       </div>
       <div class="modal-metric metric-with-tooltip">
         <div class="modal-metric-bg slop" style="width: ${normSlopWords * 100}%"></div>
@@ -1139,11 +1254,26 @@ function showDetailModal(entry) {
     }
 
     // Helper function to render items with show more
-    const renderItemsWithShowMore = (items, title, formatter) => {
+    const renderItemsWithShowMore = (items, title, formatter, helpText = null) => {
       if (!items || items.length === 0) return '';
 
       const toggleId = 'modal_' + Math.random().toString(36).substr(2, 9);
-      let itemsHtml = `<h4 style="margin-top: 16px;">${title}</h4><div style="margin-top: 8px;">`;
+      const helpId = 'help_' + Math.random().toString(36).substr(2, 9);
+
+      let itemsHtml = `<h4 style="margin-top: 16px;">`;
+      itemsHtml += title;
+
+      if (helpText) {
+        itemsHtml += `<span class="help-icon" id="${helpId}_btn">?</span>`;
+      }
+
+      itemsHtml += `</h4>`;
+
+      if (helpText) {
+        itemsHtml += `<div class="help-text" id="${helpId}_text">${helpText}</div>`;
+      }
+
+      itemsHtml += `<div style="margin-top: 8px;">`;
 
       const visibleItems = items.slice(0, 10);
       const hiddenItems = items.slice(10);
@@ -1165,53 +1295,51 @@ function showDetailModal(entry) {
       return itemsHtml;
     };
 
-    if (data.top_over_represented) {
+    // Skip over-represented and slop hits for human-baseline
+    const isHumanBaseline = entry.model === 'human-baseline';
+
+    // Add slop word hits (only for user-submitted text, not for human-baseline)
+    if (data.slop_word_hits && data.slop_word_hits.length > 0 && !isHumanBaseline) {
+      html += renderItemsWithShowMore(
+        data.slop_word_hits,
+        'Slop Word Hits',
+        hit => `<span class="pill"><b>${hit[0]}</b> <span class="muted">(${hit[1]})</span></span>`,
+        'Matches to a precompiled slop list produced with the <a href="https://github.com/sam-paech/slop-forensics" target="_blank" style="color: var(--accent);">slop-forensics toolkit</a>. The list identifies words that are over-represented in LLM outputs compared to human writing, computed from 10 models\' outputs on essay & creative writing prompts. <a href="https://github.com/sam-paech/slop-or-not/blob/main/data/slop_list.json" target="_blank" style="color: var(--accent);">View slop list</a>'
+      );
+    }
+
+    // Add slop trigram hits (only for user-submitted text, not for human-baseline)
+    if (data.slop_trigram_hits && data.slop_trigram_hits.length > 0 && !isHumanBaseline) {
+      html += renderItemsWithShowMore(
+        data.slop_trigram_hits,
+        'Slop Trigram Hits',
+        hit => `<span class="pill"><b>${hit[0]}</b> <span class="muted">(${hit[1]})</span></span>`,
+        'Matches to a precompiled slop trigram list produced with the <a href="https://github.com/sam-paech/slop-forensics" target="_blank" style="color: var(--accent);">slop-forensics toolkit</a>. The list identifies 3-word phrases that are over-represented in LLM outputs compared to human writing, computed from 10 models\' outputs on essay & creative writing prompts. <a href="https://github.com/sam-paech/slop-or-not/blob/main/data/slop_list_trigrams.json" target="_blank" style="color: var(--accent);">View trigram list</a>'
+      );
+    }
+
+    if (data.top_over_represented && !isHumanBaseline) {
       html += renderItemsWithShowMore(
         data.top_over_represented.words,
         'Top Over-represented Words',
-        w => `<span class="pill"><b>${w.word}</b> <span class="muted">${w.ratio.toFixed(2)}×</span></span>`
-      );
-
-      html += renderItemsWithShowMore(
-        data.top_over_represented.bigrams,
-        'Top Over-represented Bigrams',
-        b => `<span class="pill"><b>${b.phrase}</b> <span class="muted">${b.ratio.toFixed(2)}×</span></span>`
+        w => `<span class="pill"><b>${w.word}</b> <span class="muted">${w.ratio.toFixed(2)}×</span></span>`,
+        'Words that occur more frequently in this text than in typical human-authored text (based on wordfreq baseline).'
       );
 
       html += renderItemsWithShowMore(
         data.top_over_represented.trigrams,
         'Top Over-represented Trigrams',
-        t => `<span class="pill"><b>${t.phrase}</b> <span class="muted">${t.ratio.toFixed(2)}×</span></span>`
+        t => `<span class="pill"><b>${t.phrase}</b> <span class="muted">${t.ratio.toFixed(2)}×</span></span>`,
+        '3-word phrases that occur more frequently in this text than in typical human-authored text (based on human baseline corpus).'
       );
     }
 
-    // Add slop word hits (only for user-submitted text)
-    if (data.slop_word_hits && data.slop_word_hits.length > 0) {
-      html += renderItemsWithShowMore(
-        data.slop_word_hits,
-        'Slop Word Hits',
-        hit => `<span class="pill"><b>${hit[0]}</b> <span class="muted">(${hit[1]})</span></span>`
-      );
-    }
-
-    // Add slop trigram hits (only for user-submitted text)
-    if (data.slop_trigram_hits && data.slop_trigram_hits.length > 0) {
-      html += renderItemsWithShowMore(
-        data.slop_trigram_hits,
-        'Slop Trigram Hits',
-        hit => `<span class="pill"><b>${hit[0]}</b> <span class="muted">(${hit[1]})</span></span>`
-      );
-    }
-
-    // Add contrast matches
+    // Add contrast matches (always show, even for human-baseline)
     if (data.contrast_matches && data.contrast_matches.length > 0) {
       html += renderItemsWithShowMore(
         data.contrast_matches,
         'Not-x-but-y Patterns',
-        m => `<div class="contrast-match">
-          <div class="pattern">${m.pattern_name}</div>
-          <div>${m.sentence}</div>
-        </div>`
+        m => `<div class="contrast-match">${m.sentence}</div>`
       );
     }
   }
@@ -1230,6 +1358,17 @@ function showDetailModal(entry) {
       const count = btn.textContent.match(/\d+/)[0];
       btn.textContent = expanded ? 'Show less' : `Show ${count} more`;
     });
+  });
+
+  // Add click handlers for help icons
+  ui.modalBody.querySelectorAll('.help-icon').forEach(btn => {
+    const helpId = btn.id.replace('_btn', '');
+    const helpText = document.getElementById(`${helpId}_text`);
+    if (helpText) {
+      btn.addEventListener('click', () => {
+        helpText.classList.toggle('visible');
+      });
+    }
   });
 
   ui.modal.classList.add('visible');
@@ -1556,6 +1695,21 @@ ui.closeModal.addEventListener('click', () => {
 ui.modal.addEventListener('click', (e) => {
   if (e.target === ui.modal) {
     ui.modal.classList.remove('visible');
+  }
+});
+
+// How it works modal handlers
+ui.howItWorksBtn.addEventListener('click', () => {
+  ui.howItWorksModal.classList.add('visible');
+});
+
+ui.closeHowItWorksModal.addEventListener('click', () => {
+  ui.howItWorksModal.classList.remove('visible');
+});
+
+ui.howItWorksModal.addEventListener('click', (e) => {
+  if (e.target === ui.howItWorksModal) {
+    ui.howItWorksModal.classList.remove('visible');
   }
 });
 

@@ -155,7 +155,8 @@ function calculateDialogueFrequency(text) {
 }
 
 // Calculate metrics for a text sample
-function calculateMetrics(text) {
+// textForBigrams: optional separate text to use for bigram/trigram analysis (if limiting samples)
+function calculateMetrics(text, textForBigrams = null) {
   const toks0 = wordsOnlyLower(text);
   const toks = alphaTokens(toks0);
   const nWords = toks.length;
@@ -168,7 +169,11 @@ function calculateMetrics(text) {
   const slopResult = computeSlopIndex(toks, true);  // trackHits = true to capture top hits
 
   // Repetition score (using existing function)
-  const toksContent = contentTokens(toks);
+  // Use separate text for bigrams/trigrams if provided (for leaderboard sample limiting)
+  const textForNgrams = textForBigrams !== null ? textForBigrams : text;
+  const toks0Ngrams = wordsOnlyLower(textForNgrams);
+  const toksNgrams = alphaTokens(toks0Ngrams);
+  const toksContent = contentTokens(toksNgrams);
   const bigs = makeNgrams(toksContent, 2);
   const tris = makeNgrams(toksContent, 3);
 
@@ -283,10 +288,15 @@ function processModel(data) {
   const concatenatedText = validSamples.map(s => s.output).join('\n\n');
   console.log(`  Total text length: ${concatenatedText.length} chars`);
 
+  // For bigram/trigram over-representation, use only first 150 samples
+  const samplesForBigrams = validSamples.slice(0, 150);
+  const textForBigrams = samplesForBigrams.map(s => s.output).join('\n\n');
+  console.log(`  Using ${samplesForBigrams.length} samples for bigram/trigram analysis`);
+
   // Calculate all metrics
   console.log(`  Calculating metrics...`);
 
-  const metrics = calculateMetrics(concatenatedText);
+  const metrics = calculateMetrics(concatenatedText, textForBigrams);
 
   if (!metrics) {
     console.log(`  ⚠️  Failed to calculate metrics, skipping`);
