@@ -227,7 +227,8 @@ import {
   rankOveruseWithCounts,
   humanBigramFreq,
   humanTrigramFreq,
-  lookupFrequency
+  lookupFrequency,
+  mergePossessives
 } from './js/metrics.js';
 import { initPosTagger } from './js/pos-tagger.js';
 import { scoreText as scoreContrast } from './js/contrast-detector.js';
@@ -1407,8 +1408,9 @@ ui.btn.addEventListener('click', async () => {
     };
 
   // Top over-represented words (vs wordfreq baseline)
-  // No preprocessing needed - apostrophe stripping happens during tokenization
+  // Merge possessives for word counts (but not for ngrams)
   let wordCounts = countItems(toksContent);
+  wordCounts = mergePossessives(wordCounts);
   
   const totalWords = Array.from(wordCounts.values()).reduce((a, b) => a + b, 0);
   const wordOverrep = [];
