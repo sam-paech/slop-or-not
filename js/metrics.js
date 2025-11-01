@@ -3,15 +3,21 @@
 import { wordsOnlyLower, alphaTokens, countItems } from './utils.js';
 import { loadWordfreqEnFromFile, loadWordfreqEnFromUrl } from './wordfreq.js';
 
+// NLTK English stopwords (179 words)
+// Source: https://github.com/nltk/nltk_data/blob/gh-pages/packages/corpora/stopwords.zip
 const STOPWORDS = new Set([
-  "a","an","the","and","or","but","if","then","than","as","of","to","in","on","for",
-  "with","by","at","from","that","this","these","those","is","am","are","was","were",
-  "be","been","being","it","its","it's","i","you","he","she","they","we","me","him",
-  "her","them","us","my","your","his","their","our","yours","hers","theirs","ours",
-  "not","no","so","do","does","did","doing","have","has","had","having","will","would",
-  "can","could","should","may","might","must","there","here","up","down","out","over",
-  "under","again","further","then","once","about","into","through","during","before",
-  "after","above","below","between","own","same","other","very","just"
+  "i","me","my","myself","we","our","ours","ourselves","you","your","yours",
+  "yourself","yourselves","he","him","his","himself","she","her","hers","herself",
+  "it","its","itself","they","them","their","theirs","themselves","what","which",
+  "who","whom","this","that","these","those","am","is","are","was","were","be",
+  "been","being","have","has","had","having","do","does","did","doing","a","an",
+  "the","and","but","if","or","because","as","until","while","of","at","by","for",
+  "with","about","against","between","into","through","during","before","after",
+  "above","below","to","from","up","down","in","out","on","off","over","under",
+  "again","further","then","once","here","there","when","where","why","how","all",
+  "any","both","each","few","more","most","other","some","such","no","nor","not",
+  "only","own","same","so","than","too","very","s","t","can","will","just","don",
+  "should","now"
 ]);
 
 const FUNCTION_WORDS = new Set([

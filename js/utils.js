@@ -1,7 +1,11 @@
 // utils.js - Text normalization and tokenization utilities
 
-export function normalizeApos(s) {
-  return s.replace(/[\u2018\u2019\u02bc]/g, "'");  // ' ' ʼ
+export function normalizeQuotes(s) {
+  // Single quotes: ' ' ‛ ‚ ′ ʼ ＇ `
+  s = s.replace(/[\u2018\u2019\u201A\u201B\u2032\u02BC\uFF07`]/g, "'");
+  // Double quotes: " " „ ‟ ″ « » ＂
+  s = s.replace(/[\u201C\u201D\u201E\u201F\u2033\u00AB\u00BB\uFF02]/g, '"');
+  return s;
 }
 
 export function normalizeText(text) {
@@ -17,9 +21,10 @@ export function normalizeText(text) {
 }
 
 export function wordsOnlyLower(s) {
-  const txt = normalizeApos(s.toLowerCase());
-  const toks = txt.match(/[a-z]+(?:'[a-z]+)?/g) || [];
-  return toks;
+  const txt = normalizeQuotes(s.toLowerCase());
+  const toks = txt.match(/[a-z']+/g) || [];
+  // Strip leading/trailing apostrophes from each token
+  return toks.map(t => t.replace(/^'+|'+$/g, '')).filter(t => t.length > 0);
 }
 
 export function alphaTokens(tokens) {

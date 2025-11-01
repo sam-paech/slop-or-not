@@ -12,8 +12,6 @@ import {
   makeNgrams,
   rankOveruseWithCounts,
   lookupFrequency,
-  mergePossessives,
-  filterNumericWords,
   humanBigramFreq,
   humanTrigramFreq
 } from './js/metrics.js';
@@ -209,11 +207,9 @@ function calculateMetrics(text) {
   const avgParagraphLength = calculateAverageParagraphLength(text);
   const dialogueFrequency = calculateDialogueFrequency(text);
 
-  // Top over-represented words vs wordfreq baseline (matching HTML implementation)
-  // Apply preprocessing like HTML implementation
+  // Top over-represented words vs wordfreq baseline
+  // No preprocessing needed - apostrophe stripping happens during tokenization
   let wordCounts = countItems(toksContent);
-  wordCounts = filterNumericWords(wordCounts);
-  wordCounts = mergePossessives(wordCounts);
   
   const totalWords = Array.from(wordCounts.values()).reduce((a, b) => a + b, 0);
   const wordOverrep = [];

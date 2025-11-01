@@ -8,7 +8,7 @@
   :root { --bg:#0f1115; --fg:#e6e6e6; --muted:#9aa4ad; --card:#171a21; --accent:#6aa0ff; }
   * { box-sizing: border-box; }
   body { margin: 0; padding: 24px; background: var(--bg); color: var(--fg); font: 14px/1.45 ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial; }
-  h1 { font-size: 24px; margin: 0 0 20px; text-align: center; font-weight: 700; }
+  h1 { font-size: 36px; margin: 0 0 20px; text-align: center; font-weight: 700; }
   .row { display: grid; grid-template-columns: 1fr 380px; gap: 18px; }
   textarea { width: 100%; height: 50vh; padding: 12px; background: var(--card); color: var(--fg); border: 1px solid #2a2f3a; border-radius: 8px; resize: vertical; }
   button { background: var(--accent); color: #0b0f16; border: 0; border-radius: 8px; padding: 10px 14px; font-weight: 600; cursor: pointer; }
@@ -106,6 +106,75 @@
   .metric-with-tooltip { position: relative; cursor: help; }
   .metric-with-tooltip .tooltip-text { visibility: hidden; position: absolute; z-index: 1000; background: #2a2f3a; color: var(--fg); padding: 8px 12px; border-radius: 6px; font-size: 12px; width: 240px; left: 0; top: 100%; margin-top: 4px; opacity: 0; transition: opacity 0.2s; line-height: 1.4; box-shadow: 0 4px 6px rgba(0,0,0,0.3); pointer-events: none; }
   .metric-with-tooltip:hover .tooltip-text { visibility: visible; opacity: 1; }
+
+  /* Slop/Not Slop verdict animation */
+  #verdictOverlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; display: none; align-items: center; justify-content: center; z-index: 9999; pointer-events: none; }
+  #verdictOverlay.visible { display: flex; }
+  .verdict-content { text-align: center; animation: verdictFadeIn 0.9s ease-out; }
+  @keyframes verdictFadeIn {
+    from { opacity: 0; transform: scale(0.8); }
+    to { opacity: 1; transform: scale(1); }
+  }
+  .verdict-text { font-size: 72px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.15em; text-shadow: 0 4px 12px rgba(0,0,0,0.5); margin: 0; font-family: "Arial", "Helvetica Neue", sans-serif; }
+
+  /* Slop verdict with overlay text */
+  .slop-container { position: relative; display: inline-block; }
+  .verdict-text.slop { color: #ff4444; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 2; width: 100%; text-align: center; }
+  .verdict-text.not-slop {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    position: relative;
+    animation: notSlopFadeOut 0.3s ease-out 2.6s forwards;
+    padding: 20px 50px;
+  }
+  .verdict-text.not-slop::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: white;
+    opacity: 1.0;
+    border-radius: 100px;
+    mask-image: radial-gradient(ellipse closest-side, black 82%, transparent 100%);
+    -webkit-mask-image: radial-gradient(ellipse closest-side, black 82%, transparent 100%);
+    z-index: -1;
+  }
+
+  /* Fade out for entire not-slop text */
+  @keyframes notSlopFadeOut {
+    from { opacity: 1; }
+    to { opacity: 0; }
+  }
+
+  /* Rainbow letter drop animation - with acceleration (ease-in) */
+  .letter { display: inline-block; animation: letterDrop 0.4s ease-in; -webkit-text-stroke: 2px white; paint-order: stroke fill; opacity: 0; animation-fill-mode: forwards; }
+  @keyframes letterDrop {
+    0% { transform: translateY(-150px); opacity: 0; }
+    60% { transform: translateY(8px); opacity: 1; }
+    80% { transform: translateY(-3px); opacity: 1; }
+    100% { transform: translateY(0); opacity: 1; }
+  }
+  .letter:nth-child(1) { animation-delay: 0s; color: #ff0080; }
+  .letter:nth-child(2) { animation-delay: 0.05s; color: #ff8c00; }
+  .letter:nth-child(3) { animation-delay: 0.1s; color: #ffd700; }
+  .letter:nth-child(4) { animation-delay: 0.15s; color: #00ff00; }
+  .letter:nth-child(5) { animation-delay: 0.2s; color: #00bfff; }
+  .letter:nth-child(6) { animation-delay: 0.25s; color: #8a2be2; }
+  .letter:nth-child(7) { animation-delay: 0.3s; color: #ff1493; }
+  .letter:nth-child(8) { animation-delay: 0.35s; color: #ff4500; }
+
+  /* Sparkle animation */
+  .sparkle { position: absolute; top: 5px; right: 5px; width: 35px; height: 35px; animation: sparklePopIn 0.4s ease-out 0.9s forwards; }
+  @keyframes sparklePopIn {
+    0% { transform: scale(0) rotate(0deg); opacity: 0; }
+    50% { transform: scale(1.2) rotate(180deg); opacity: 1; }
+    100% { transform: scale(1) rotate(360deg); opacity: 1; }
+  }
+
+  .paint-splash { width: 350px; height: 350px; filter: drop-shadow(0 4px 12px rgba(0,0,0,0.3)); }
 </style>
 </head>
 <body>
@@ -141,6 +210,11 @@
     </div>
   </div>
 
+  <!-- Verdict overlay -->
+  <div id="verdictOverlay">
+    <div class="verdict-content" id="verdictContent"></div>
+  </div>
+
 <script type="module">
 import { wordsOnlyLower, alphaTokens, countItems } from './js/utils.js';
 import {
@@ -153,9 +227,7 @@ import {
   rankOveruseWithCounts,
   humanBigramFreq,
   humanTrigramFreq,
-  lookupFrequency,
-  mergePossessives,
-  filterNumericWords
+  lookupFrequency
 } from './js/metrics.js';
 import { initPosTagger } from './js/pos-tagger.js';
 import { scoreText as scoreContrast } from './js/contrast-detector.js';
@@ -173,6 +245,8 @@ const ui = {
   modal: document.getElementById('detailModal'),
   modalBody: document.getElementById('modalBody'),
   closeModal: document.getElementById('closeModal'),
+  verdictOverlay: document.getElementById('verdictOverlay'),
+  verdictContent: document.getElementById('verdictContent'),
 };
 
 let ready = false;
@@ -182,6 +256,132 @@ let userResult = null;
 let selectedModel = null;
 let analysisResourcesLoaded = false;
 let uploadedFiles = [];
+
+// Verdict animation
+function showVerdict(slopScore) {
+  const isSlop = slopScore > 25;
+
+  const paintSplashSVG = `
+    <svg class="paint-splash" viewBox="0 0 300 300" xmlns="http://www.w3.org/2000/svg">
+      <g>
+        <!-- Main splash body -->
+        <ellipse cx="150" cy="150" rx="90" ry="85" fill="#39ff14" opacity="0.95" transform="rotate(-12 150 150)"/>
+        <ellipse cx="140" cy="160" rx="75" ry="70" fill="#39ff14" opacity="0.9" transform="rotate(25 140 160)"/>
+
+        <!-- Irregular edges -->
+        <ellipse cx="95" cy="120" rx="45" ry="35" fill="#39ff14" opacity="0.85" transform="rotate(-30 95 120)"/>
+        <ellipse cx="205" cy="140" rx="50" ry="38" fill="#39ff14" opacity="0.88" transform="rotate(45 205 140)"/>
+        <ellipse cx="130" cy="215" rx="40" ry="32" fill="#39ff14" opacity="0.9" transform="rotate(15 130 215)"/>
+        <ellipse cx="170" cy="90" rx="35" ry="28" fill="#39ff14" opacity="0.87" transform="rotate(-50 170 90)"/>
+
+        <!-- Drips and splatters -->
+        <ellipse cx="70" cy="105" rx="25" ry="30" fill="#39ff14" opacity="0.8" transform="rotate(10 70 105)"/>
+        <ellipse cx="225" cy="175" rx="28" ry="35" fill="#39ff14" opacity="0.82" transform="rotate(-20 225 175)"/>
+        <ellipse cx="150" cy="235" rx="22" ry="28" fill="#39ff14" opacity="0.85" transform="rotate(5 150 235)"/>
+
+        <!-- Small splatters -->
+        <circle cx="50" cy="85" r="18" fill="#39ff14" opacity="0.75"/>
+        <circle cx="240" cy="120" r="15" fill="#39ff14" opacity="0.7"/>
+        <circle cx="110" cy="250" r="12" fill="#39ff14" opacity="0.78"/>
+        <circle cx="195" cy="70" r="14" fill="#39ff14" opacity="0.72"/>
+        <circle cx="260" cy="160" r="10" fill="#39ff14" opacity="0.68"/>
+        <circle cx="40" cy="140" r="11" fill="#39ff14" opacity="0.7"/>
+
+        <!-- Many scattered tiny dots - unevenly distributed -->
+        <circle cx="30" cy="100" r="6" fill="#39ff14" opacity="0.65"/>
+        <circle cx="270" cy="135" r="7" fill="#39ff14" opacity="0.63"/>
+        <circle cx="180" cy="260" r="5" fill="#39ff14" opacity="0.66"/>
+        <circle cx="85" cy="55" r="6" fill="#39ff14" opacity="0.64"/>
+        <circle cx="245" cy="95" r="5" fill="#39ff14" opacity="0.62"/>
+        <circle cx="20" cy="130" r="4" fill="#39ff14" opacity="0.6"/>
+        <circle cx="285" cy="170" r="3" fill="#39ff14" opacity="0.58"/>
+        <circle cx="15" cy="160" r="3" fill="#39ff14" opacity="0.55"/>
+        <circle cx="65" cy="35" r="5" fill="#39ff14" opacity="0.63"/>
+        <circle cx="280" cy="200" r="4" fill="#39ff14" opacity="0.6"/>
+        <circle cx="220" cy="50" r="4" fill="#39ff14" opacity="0.61"/>
+        <circle cx="45" cy="200" r="3" fill="#39ff14" opacity="0.57"/>
+        <circle cx="265" cy="75" r="3" fill="#39ff14" opacity="0.59"/>
+        <circle cx="120" cy="30" r="4" fill="#39ff14" opacity="0.62"/>
+        <circle cx="190" cy="275" r="3" fill="#39ff14" opacity="0.58"/>
+        <circle cx="25" cy="180" r="2" fill="#39ff14" opacity="0.54"/>
+        <circle cx="290" cy="145" r="3" fill="#39ff14" opacity="0.56"/>
+        <circle cx="155" cy="25" r="3" fill="#39ff14" opacity="0.6"/>
+        <circle cx="10" cy="115" r="2" fill="#39ff14" opacity="0.52"/>
+        <circle cx="275" cy="225" r="4" fill="#39ff14" opacity="0.61"/>
+        <circle cx="35" cy="220" r="3" fill="#39ff14" opacity="0.57"/>
+        <circle cx="250" cy="40" r="2" fill="#39ff14" opacity="0.55"/>
+        <circle cx="95" cy="280" r="3" fill="#39ff14" opacity="0.58"/>
+        <circle cx="210" cy="25" r="2" fill="#39ff14" opacity="0.53"/>
+        <circle cx="8" cy="145" r="2" fill="#39ff14" opacity="0.51"/>
+        <circle cx="292" cy="190" r="2" fill="#39ff14" opacity="0.54"/>
+        <circle cx="140" cy="15" r="3" fill="#39ff14" opacity="0.59"/>
+        <circle cx="75" cy="270" r="2" fill="#39ff14" opacity="0.56"/>
+        <circle cx="230" cy="285" r="3" fill="#39ff14" opacity="0.58"/>
+        <circle cx="18" cy="75" r="2" fill="#39ff14" opacity="0.53"/>
+        <circle cx="285" cy="110" r="2" fill="#39ff14" opacity="0.52"/>
+      </g>
+    </svg>
+  `;
+
+  const sparkleSVG = `
+    <svg class="sparkle" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <radialGradient id="sparkleGrad" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" style="stop-color:#ffffff;stop-opacity:1" />
+          <stop offset="50%" style="stop-color:#ffffaa;stop-opacity:0.9" />
+          <stop offset="100%" style="stop-color:#ffdd00;stop-opacity:0.7" />
+        </radialGradient>
+        <filter id="glow">
+          <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+          <feMerge>
+            <feMergeNode in="coloredBlur"/>
+            <feMergeNode in="SourceGraphic"/>
+          </feMerge>
+        </filter>
+      </defs>
+      <!-- Main star shape with 4 points -->
+      <polygon points="50,10 55,45 90,50 55,55 50,90 45,55 10,50 45,45" fill="url(#sparkleGrad)" filter="url(#glow)"/>
+      <!-- Smaller diagonal star overlay -->
+      <polygon points="50,25 58,48 75,50 58,52 50,75 42,52 25,50 42,48" fill="#ffffff" opacity="0.8"/>
+      <!-- Center bright spot -->
+      <circle cx="50" cy="50" r="8" fill="#ffffff" opacity="0.95"/>
+    </svg>
+  `;
+
+  let html = '';
+  if (isSlop) {
+    html = `
+      <div class="slop-container">
+        ${paintSplashSVG}
+        <h1 class="verdict-text slop">Slop</h1>
+      </div>
+    `;
+  } else {
+    // Split "NOT SLOP" into individual letters
+    const text = "NOT SLOP";
+    const letters = text.split('').map((char, i) => {
+      if (char === ' ') {
+        return '<span class="letter" style="width: 20px;"></span>';
+      }
+      return `<span class="letter">${char}</span>`;
+    }).join('');
+
+    html = `
+      <h1 class="verdict-text not-slop">
+        ${letters}
+        ${sparkleSVG}
+      </h1>
+    `;
+  }
+
+  ui.verdictContent.innerHTML = html;
+  ui.verdictOverlay.classList.add('visible');
+
+  // Remove after animation (+0.5s more on screen: 2400ms -> 2900ms)
+  setTimeout(() => {
+    ui.verdictOverlay.classList.remove('visible');
+  }, 2900);
+}
 
 // File management functions
 function formatFileSize(bytes) {
@@ -1207,10 +1407,8 @@ ui.btn.addEventListener('click', async () => {
     };
 
   // Top over-represented words (vs wordfreq baseline)
-  // Apply preprocessing like Python implementation
+  // No preprocessing needed - apostrophe stripping happens during tokenization
   let wordCounts = countItems(toksContent);
-  wordCounts = filterNumericWords(wordCounts);
-  wordCounts = mergePossessives(wordCounts);
   
   const totalWords = Array.from(wordCounts.values()).reduce((a, b) => a + b, 0);
   const wordOverrep = [];
@@ -1237,6 +1435,9 @@ ui.btn.addEventListener('click', async () => {
     trigrams: topTCounts.slice(0, 100).map(([phrase, ratio, count]) => ({ phrase, ratio, count }))
   };
 
+  // Show verdict animation
+  showVerdict(userSlopScore);
+
   // Re-enable button
   ui.btn.disabled = false;
   ui.btn.textContent = originalBtnText;
@@ -1245,18 +1446,25 @@ ui.btn.addEventListener('click', async () => {
   uploadedFiles = [];
   ui.input.value = '';
 
-  // Show leaderboard after analysis
+  // Show leaderboard immediately (don't wait for animation)
   showLeaderboard();
 
-  // Scroll to user's position on leaderboard
+  // Select user's result immediately
+  setTimeout(() => {
+    const userRow = ui.leaderboard.querySelector('.leaderboard-row.user-result');
+    if (userRow) {
+      // Click the row to select it immediately
+      userRow.click();
+    }
+  }, 100);
+
+  // Scroll to user's position on leaderboard after animation completes
   setTimeout(() => {
     const userRow = ui.leaderboard.querySelector('.leaderboard-row.user-result');
     if (userRow) {
       userRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      // Click the row to select it
-      userRow.click();
     }
-  }, 100);
+  }, 3000);
 
   } catch (error) {
     console.error('Analysis error:', error);
