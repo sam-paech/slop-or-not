@@ -28,21 +28,64 @@
   /* Navigation styles */
   .nav-separator { color: var(--muted); margin: 0 4px; }
   .nav-dropdown { position: relative; display: inline-block; }
-  .nav-dropdown-toggle { background: transparent; border: none; color: var(--accent); cursor: pointer; padding: 0; font-size: 14px; text-decoration: none; }
+  .nav-dropdown-toggle {
+    background: none;
+    border: none;
+    padding: 0;
+    font: inherit;
+    color: #007bff;
+    cursor: pointer;
+    text-decoration: none;
+  }
   .nav-dropdown-toggle:hover { text-decoration: underline; }
-  .nav-dropdown-menu { display: none; position: absolute; background: var(--card); border: 1px solid #2a2f3a; border-radius: 6px; padding: 8px 0; min-width: 200px; z-index: 100; top: 100%; left: 0; margin-top: 4px; }
+  .nav-dropdown-toggle::after { content: ' ▾'; font-size: 0.8em; }
+
+  body.dark-mode .nav-dropdown-toggle { color: #4dabf7; }
+
+  .nav-dropdown-menu {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    margin-top: 8px;
+    padding: 8px 0;
+    background: #ffffff;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    border-radius: 4px;
+    min-width: 200px;
+    z-index: 1000;
+  }
   .nav-dropdown-menu.show { display: block; }
-  .nav-dropdown-item { display: block; padding: 6px 12px; color: var(--accent); text-decoration: none; }
-  .nav-dropdown-item:hover { background: #2a2f3a; }
+  .nav-dropdown-item {
+    display: block;
+    padding: 8px 16px;
+    color: inherit;
+    text-decoration: none;
+    white-space: nowrap;
+  }
+  .nav-dropdown-item:hover {
+    background: rgba(0, 0, 0, 0.05);
+    color: inherit;
+    text-decoration: none;
+  }
+
+  body.dark-mode .nav-dropdown-menu {
+    background: #1a1a1a;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+  }
+  body.dark-mode .nav-dropdown-item:hover {
+    background: rgba(255, 255, 255, 0.1);
+  }
 
   /* Slop-specific content font (not applied to header/nav) */
   .slop-content {
     font: 14px/1.45 ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial;
-    margin-top: -8px;
+    margin-top: 24px;
   }
 
   .slop-content > .section:first-child {
-    margin-top: 8px;
+    margin-top: 0;
+    padding: 0;
   }
 
   /* Light mode base styles */
@@ -55,6 +98,18 @@
   button:disabled { opacity: .55; cursor: not-allowed; }
   button.show-more { background: transparent; color: var(--accent); padding: 6px 10px; font-size: 12px; margin-top: 6px; border: 1px solid var(--accent); }
   button.show-more:hover { background: var(--accent); color: var(--bg); }
+
+  /* Light mode: show-more buttons - minimalist b&w */
+  body:not(.dark-mode) button.show-more {
+    background: #ffffff;
+    color: #222;
+    border: 1px solid #ccc;
+  }
+  body:not(.dark-mode) button.show-more:hover {
+    background: #f0f0f0;
+    color: #222;
+    border: 1px solid #999;
+  }
   .panel { background: var(--card); border: 1px solid #2a2f3a; border-radius: 8px; padding: 12px 14px; }
   .muted { color: var(--muted); }
   .metric { display: grid; grid-template-columns: 1fr auto; gap: 8px; padding: 6px 0; border-bottom: 1px dashed #2a2f3a; }
@@ -366,10 +421,46 @@
     background: #333;
     color: #fff;
   }
+
+  /* Light mode: Drag-over styling */
+  body:not(.dark-mode) textarea.drag-over {
+    border-color: #4169e1;
+    background: #f0f4ff;
+  }
+
+  /* Light mode: File list and items */
+  body:not(.dark-mode) #fileList {
+    background: #f8f8f8;
+    border: 1px solid #ddd;
+  }
+
+  body:not(.dark-mode) .file-item {
+    background: #ffffff;
+    border: 1px solid #ddd;
+  }
+
+  body:not(.dark-mode) .file-size {
+    color: #666;
+  }
+
+  body:not(.dark-mode) .file-remove {
+    background: transparent;
+    color: #dc3545;
+    border: 1px solid #dc3545;
+  }
+
+  body:not(.dark-mode) .file-remove:hover {
+    background: #dc3545;
+    color: #ffffff;
+  }
+
+  body:not(.dark-mode) .drop-hint {
+    color: #666;
+  }
 </style>
 </head>
 <body>
-  <div class="container mt-4">
+  <div class="container">
     <div class="form-check form-switch">
       <input class="form-check-input" type="checkbox" id="darkModeToggle">
       <label class="form-check-label" for="darkModeToggle" id="toggleLabel">Light</label>
@@ -392,7 +483,7 @@
       <span class="nav-separator">|</span>
       <a href='creative_writing.html'>🎨Creative Writing v3</a>
       <span class="nav-separator">|</span>
-      <b>🧪Slop-or-Not</b>
+      <b>☢️Slop-or-Not</b>
       <span class="nav-separator">|</span>
       <a href='judgemark-v2.html'>⚖️Judgemark v2.1</a>
       <span class="nav-separator">|</span>
@@ -623,8 +714,13 @@ function showVerdict(slopScore) {
       <defs>
         <radialGradient id="sparkleGrad" cx="50%" cy="50%" r="50%">
           <stop offset="0%" style="stop-color:#ffffff;stop-opacity:1" />
-          <stop offset="50%" style="stop-color:#ffffaa;stop-opacity:0.9" />
-          <stop offset="100%" style="stop-color:#ffdd00;stop-opacity:0.7" />
+          <stop offset="50%" style="stop-color:#ffd700;stop-opacity:1" />
+          <stop offset="100%" style="stop-color:#ffaa00;stop-opacity:0.9" />
+        </radialGradient>
+        <radialGradient id="bgGlow" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" style="stop-color:#ffffff;stop-opacity:0.4" />
+          <stop offset="70%" style="stop-color:#ffd700;stop-opacity:0.15" />
+          <stop offset="100%" style="stop-color:#ffaa00;stop-opacity:0" />
         </radialGradient>
         <filter id="glow">
           <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
@@ -634,12 +730,14 @@ function showVerdict(slopScore) {
           </feMerge>
         </filter>
       </defs>
+      <!-- Background glow circle for light mode visibility -->
+      <circle cx="50" cy="50" r="48" fill="url(#bgGlow)" opacity="0.8"/>
       <!-- Main star shape with 4 points -->
-      <polygon points="50,10 55,45 90,50 55,55 50,90 45,55 10,50 45,45" fill="url(#sparkleGrad)" filter="url(#glow)"/>
+      <polygon points="50,10 55,45 90,50 55,55 50,90 45,55 10,50 45,45" fill="url(#sparkleGrad)" filter="url(#glow)" stroke="#cc8800" stroke-width="1.5"/>
       <!-- Smaller diagonal star overlay -->
-      <polygon points="50,25 58,48 75,50 58,52 50,75 42,52 25,50 42,48" fill="#ffffff" opacity="0.8"/>
+      <polygon points="50,25 58,48 75,50 58,52 50,75 42,52 25,50 42,48" fill="#ffffff" opacity="0.9" stroke="#dd9900" stroke-width="1"/>
       <!-- Center bright spot -->
-      <circle cx="50" cy="50" r="8" fill="#ffffff" opacity="0.95"/>
+      <circle cx="50" cy="50" r="8" fill="#ffffff" opacity="0.95" stroke="#ffcc00" stroke-width="0.5"/>
     </svg>
   `;
 
